@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include "gramtree.h"
 
 struct ast *new_ast(char *name, int num,...)
@@ -15,12 +16,14 @@ struct ast *new_ast(char *name, int num,...)
     }
     root->name = name;
     va_start(valist, num);
-    if (num >= 1)
+    if (num >= 1)//nonterminal token
     {
         p = va_arg(valist, struct ast *);
         root->line = p->line;
         root->l = p;
-        while(num>1)
+        root->type = p->type;
+        root->id = p->id;
+        while (num > 1)
         {
             p->r = va_arg(valist, struct ast *);
             p = p->r;
@@ -34,21 +37,27 @@ struct ast *new_ast(char *name, int num,...)
         {
             root->id = (char *)malloc(sizeof(char) * 50);
             strcpy(root->id, yytext);
+            if (!strcmp(root->id, "int"))
+                root->type = 1;
+            else
+                root->type = 2;
             root->l = root->r = 0;
         }
         else if (!strcmp(name, "INT"))
         {
             root->a = strtol(yytext,NULL,0);
+            root->type = 4;
             root->l = root->r = 0;
         }
         else if (!strcmp(name, "FLOAT"))
         {
             root->b = atof(yytext);
+            root->type = 5;
             root->l = root->r = 0;
         }
     }
     else
-        root->line = -1;
+        root->line = -1;//void production statment
     return root;
 }
 void print_tree(struct ast *root, int level)
@@ -68,7 +77,8 @@ void print_tree(struct ast *root, int level)
                 printf("(%d)",root->line);
         }
         if(root->line!=-1) printf("\n");
-        print_tree(root->l,level+1);
+        sleep(3);
+        print_tree(root->l, level + 1);
         print_tree(root->r,level);
     }
 }

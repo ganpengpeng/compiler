@@ -1,5 +1,6 @@
 %{
     #include "gramtree.h"
+    #include "semanteme.h"
     #include "lex.yy.c"
     int flag=0;
 %}
@@ -55,8 +56,22 @@ OptTag:
 Tag:
     ID {$$=new_ast("Tag",1,$1);};
 VarDec:
-    ID {$$=new_ast("VarDec",1,$1);}
-    | VarDec LB INT RB {$$=new_ast("VarDec",4,$1,$2,$3,$4);};
+    ID {
+        $$=new_ast("VarDec",1,$1);
+        $1->type = 1;
+        if (exist_var($1->id) || exist_arr($1->id))
+        {
+            printf("Error type 3 at line %d: Redefined variable \"%s\"\n", $1->line, $1->id);
+        }
+        else
+            add_var($1->id, 1);
+    }
+| VarDec LB INT RB {
+    $1->type = 3;
+    $$ = new_ast("VarDec", 4, $1, $2, $3, $4);
+    del_var($1->name);
+    add_arr($1->id, 1, $3->a);
+};
 FunDec:
     ID LP VarList RP {$$=new_ast("FunDec",4,$1,$2,$3,$4);}
     | ID LP RP {$$=new_ast("FunDec",3,$1,$2,$3);};
@@ -82,20 +97,37 @@ DefList:
     Def DefList {$$=new_ast("DefList",2,$1,$2);}
     | {$$=new_ast("DefList",-1);};
 Def:
-    Specifier DecList SEMI {$$=new_ast("Def",3,$1,$2,$3);}
+    Specifier DecList SEMI {
+        $$=new_ast("Def",3,$1,$2,$3);
+        if(!strcmp($1->l->name,"TYPE"))
+            if(!strcmp($1->l->id,"int"))
+            {//int variables
+                set_type($2,1);
+            }
+            else{//float variables
+                set_type($2,2);
+            }
+        else{//struct variables
+            set_type($2,4);
+        }
+    }
     | error SEMI {yyerrok;};
 DecList:
     Dec {$$=new_ast("DecList",1,$1);}
     | Dec COMMA DecList {$$=new_ast("DecList",3,$1,$2,$3);};
 Dec:
     VarDec {$$=new_ast("Dec",1,$1);}
-    | VarDec ASSIGNOP Exp {$$=new_ast("Dec",3,$1,$2,$3);};
-Exp:
-    Exp ASSIGNOP Exp {$$=new_ast("Exp",3,$1,$2,$3);}
+    | VarDec ASSIGNOP Exp {
+        $$=new_ast("Dec",3,$1,$2,$3);
+    };
+Exp : Exp ASSIGNOP Exp { $$ = new_ast("Exp", 3, $1, $2, $3); }
     | Exp AND Exp {$$=new_ast("Exp",3,$1,$2,$3);}
     | Exp OR Exp {$$=new_ast("Exp",3,$1,$2,$3);}
     | Exp RELOP Exp {$$=new_ast("Exp",3,$1,$2,$3);}
-    | Exp PLUS Exp {$$=new_ast("Exp",3,$1,$2,$3);}
+    | Exp PLUS Exp {
+        $$=new_ast("Exp",3,$1,$2,$3);
+
+    }
     | Exp MINUS Exp {$$=new_ast("Exp",3,$1,$2,$3);}
     | Exp STAR Exp {$$=new_ast("Exp",3,$1,$2,$3);}
     | Exp DIV Exp {$$=new_ast("Exp",3,$1,$2,$3);}
@@ -106,15 +138,23 @@ Exp:
     | ID LP RP {$$=new_ast("Exp",3,$1,$2,$3);}
     | Exp LB Exp RB {$$=new_ast("Exp",4,$1,$2,$3,$4);}
     | Exp DOT ID {$$=new_ast("Exp",3,$1,$2,$3);}
-    | ID {$$=new_ast("Exp",1,$1);}
-    | INT {$$=new_ast("Exp",1,$1);}
+    | ID {
+        $$=new_ast("Exp",1,$1);
+        if(!exist_var($1->id)){
+            printf("Error type 1 at line %d: Undefined variable \"%s\"\n", $1->line, $1->id);
+            //flag = 1;
+        }
+    }
+    | INT {
+        $$=new_ast("Exp",1,$1);
+    }
     | FLOAT {$$=new_ast("Exp",1,$1);};
 Args:
     Exp COMMA Args {$$=new_ast("Args",3,$1,$2,$3);}
     | Exp {$$=new_ast("Args",1,$1);};
 %%
-yyerror(char *msg)
+yyerror(const char *msg)
 {
-    printf("Syntax error at line %d : %s\n",yylineno,msg);
-    flag=1;
+    printf("Syntax error at line %d : %s\n", yylineno, msg);
+    flag = 1;
 }

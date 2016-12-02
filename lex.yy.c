@@ -889,6 +889,7 @@ case 9:
 YY_RULE_SETUP
 #line 51 "lexical.l"
 {
+				yylval.p=new_ast("INT",0);
 				char *c=yytext;
 				if(*c=='0'){
 					if(yyleng==1) return INT;
@@ -920,7 +921,6 @@ YY_RULE_SETUP
 						}
 					}
 				}
-				yylval.p=new_ast("INT",0);
 				return INT;
 			}
 	YY_BREAK

@@ -8,6 +8,7 @@ extern char *yytext;
 struct ast
 {
     int line;
+    int type;//1:int var,2:float var,3:array,4:c_int,5:c_float,6:fun,7:struct
     char *name;
     struct ast *l;
     struct ast *r;

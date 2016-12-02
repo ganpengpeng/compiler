@@ -49,6 +49,7 @@ RC \}
 {PLUS}		{yylval.p=new_ast("PLUS",0);return PLUS;}
 {MINUS}		{yylval.p=new_ast("MINUS",0);return MINUS;}
 {INT}		{
+				yylval.p=new_ast("INT",0);
 				char *c=yytext;
 				if(*c=='0'){
 					if(yyleng==1) return INT;
@@ -80,7 +81,6 @@ RC \}
 						}
 					}
 				}
-				yylval.p=new_ast("INT",0);
 				return INT;
 			}
 {FLOAT}		{
