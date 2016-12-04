@@ -67,8 +67,10 @@ StructSpecifier:
         if(exist_var($2->l->id)||exist_arr($2->l->id)){
             printf("Error type 3 at line %d: Redefined variable \"%s\".\n", $1->line, $1->id);
         }
-        else
+        else{
             add_struct($2->l->id, $4);
+            //printf("%s\n", $2->l->id);
+        }
         $$ = new_ast("StructSpecifier", 5, $1, $2, $3, $4, $5);
     }
     | STRUCT Tag {$$=new_ast("StructSpecifier",2,$1,$2);};
@@ -79,20 +81,21 @@ Tag:
     ID {$$=new_ast("Tag",1,$1);};
 VarDec:
     ID {
-        $1->type = 0;
+        //$1->type = 0;
         $$=new_ast("VarDec",1,$1);
-        if (exist_var($1->id) || exist_arr($1->id))
+        /*
+        /if (exist_var($1->id) || exist_arr($1->id))
         {
             flag = 1;
             printf("Error type 3 at line %d: Redefined variable \"%s\".\n", $1->line, $1->id);
         }
         else
-            add_var($1->id, 0);
+            add_var($1->id, 0);*/
     }
     | VarDec LB INT RB {
         $1->type = 3;
         $$ = new_ast("VarDec", 4, $1, $2, $3, $4);
-        del_var($1->l->id);
+        //del_var($1->l->id);
         add_arr($1->id, 0, $3->a);
     };
 FunDec:

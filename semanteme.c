@@ -25,19 +25,19 @@ struct ast* search_name(struct ast* p,char *name)
         return j;
     return 0;
 }
-/*void add_sym_type(struct ast* p,char *name,int type,char* struct_name)
+void add_sym_type(struct ast* p,char *name,int type,char* struct_name)
 {
     if(!p)
         return;
     if(type==7){
         if(!strcmp(p->name,name)){
-            add_struct(p->id, type);
-            set_arr_type(p->id, type);
+            add_var(p->id, type,struct_name);
+            add_arr(p->id, type,struct_name);
         }
-        set_sym_type(p->l, name,type);
-        set_sym_type(p->r, name,type);
+        set_sym_type(p->l, name,type,struct_name);
+        set_sym_type(p->r, name,type,struct_name);
     }
-}*/
+}
 void set_sym_type(struct ast* p,char *name,int type)
 {
     if(!p)
@@ -59,7 +59,7 @@ void set_node_type(struct ast* p,char *name,int type)
     set_node_type(p->l, name,type);
     set_node_type(p->r, name,type);
 }
-void add_var(char *name, int type)
+void add_var(char *name, int type,char *struct_name)
 {
     var_type_p temp = (var_type_p)malloc(sizeof(struct var_type));
     temp->name = name;
@@ -67,6 +67,22 @@ void add_var(char *name, int type)
     temp->var_next = var_p;
     var_p = temp;
     printf("add var: %s, type: %d\n", name, type);
+}
+void add_digui_var(struct ast *p, var_type_p *var,int type){
+    if(!p)
+        return;
+    if(!strcmp(p->name,"ID")){
+        //del_var(p->id);
+        printf("digui,%s:%d\n", p->id, type);
+        var_type_p temp = (var_type_p)malloc(sizeof(struct var_type));
+        temp->name = p->id;
+        temp->type = type;
+        temp->var_next = *var;
+        *var = temp;
+    }
+    digui(p->l, var,type);
+    digui(p->r, var,type);
+    return;
 }
 int exist_var(char *name)
 {
@@ -120,12 +136,13 @@ void del_var(char *name)
             p->var_next = p->var_next->var_next;
             free(temp);
             printf("del var %s\n", name);
+            return;
         }
     }
     return;
 }
 
-void add_arr(char *name,int type,int dimen)
+void add_arr(char *name,int type,int dimen,char *struct_name)
 {
     printf("add arr: %s, dimen: %d\n",name,dimen);
     array_type_p temp = array_p;
@@ -188,12 +205,12 @@ int type_arr(char *name)
     }
     return 0;
 }
-void digui(struct ast *p, var_type_p *var,int type){
+void add_struct_var(struct ast *p, var_type_p *var,int type){
     if(!p)
         return;
     if(!strcmp(p->name,"ID")){
-        del_var(p->id);
-        printf("%s:%d\n", p->id, type);
+        //del_var(p->id);
+        printf("digui,%s:%d\n", p->id, type);
         var_type_p temp = (var_type_p)malloc(sizeof(struct var_type));
         temp->name = p->id;
         temp->type = type;

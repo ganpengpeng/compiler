@@ -35,6 +35,7 @@ struct array_type
 {
     char *name;
     int type;
+    char *struct_name;
     struct dimen *d;
     struct array_type *array_next;
 };
@@ -48,10 +49,11 @@ struct fun_type
     struct fun_type *fun_next;
 };
 struct ast *search_name(struct ast *p, char *name);
-//void add_sym_type(struct ast *p, char *name, int type, char *struct_name);
+void add_sym_type(struct ast *p, char *name, int type, char *struct_name);
 void set_sym_type(struct ast *p, char *name, int type);
 void set_node_type(struct ast *p,char* name, int type);
-void add_var(char *name, int type);
+void add_var(char *name, int type,char *struct_name);
+void add_digui_var(struct ast *p, var_type_p *var, int type);
 int exist_var(char *name);
 int type_var(char *name);
 void set_var_type(char *name, int type);
@@ -60,7 +62,7 @@ void add_arr(char *name, int type, int dimen);
 int exist_arr(char *name);
 void set_arr_type(char *name, int type);
 int type_arr(char *name);
-void digui(struct ast *p, struct var_type **var, int type);
+void add_struct_var(struct ast *p, struct var_type **var, int type);
 void add_struct(char *name, struct ast *var);
 int exist_struct(char *name);
 #endif
