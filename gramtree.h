@@ -1,8 +1,6 @@
 #ifndef GRAMTREE_H
 #define GRAMTREE_H
 
-#include <stdarg.h>
-#include <string.h>
 extern int yylineno;
 extern char *yytext;
 struct ast
@@ -21,6 +19,6 @@ struct ast
 };
 
 struct ast *new_ast(char *name, int num,...);
-void print_tree(struct ast *, int level);
+void print_tree(struct ast * p, int level);
 
 #endif

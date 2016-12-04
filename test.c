@@ -1,6 +1,6 @@
-int i, j;
-int i, j;
+int i, j[5];
+//int i, j;
 int main()
 {
-    int i, j;
+    1 [1];
 }

@@ -1,6 +1,5 @@
 %{
 	#include "syntax.tab.h"
-	#include "gramtree.h"
 	extern int flag;
 	int yycolumn=1;
 	#define YY_USER_ACTION\

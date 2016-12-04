@@ -1,27 +1,28 @@
 #include "semanteme.h"
-#include "gramtree.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-typedef struct var_type * var_type_p;
-typedef struct struct_type * struct_type_p;
-typedef struct array_type * array_type_p;
-typedef struct fun_type * fun_type_p;
+typedef struct var_type* var_type_p;
+typedef struct struct_type* struct_type_p;
+typedef struct array_type* array_type_p;
+typedef struct fun_type* fun_type_p;
 var_type_p var_p = NULL;
 struct_type_p struct_p = NULL;
 array_type_p array_p = NULL;
 fun_type_p fun_p = NULL;
-int search_name(struct ast* p,char *name)
-{
+struct ast* search_name(struct ast* p,char *name)
+{//down to find name and return pointer to node
     if(!p)
         return 0;
     if(!strcmp(p->name,name)){
-        return 1;
+        return p;
     }
-    int i=search_name(p->l, name);
-    int j=search_name(p->r, name);
-    if(i||j)
-        return 1;
+    struct ast* i=search_name(p->l, name);
+    struct ast* j=search_name(p->r, name);
+    if(i)
+        return i;
+    if(j)
+        return j;
     return 0;
 }
 void set_sym_type(struct ast* p,char *name,int type)
@@ -32,8 +33,8 @@ void set_sym_type(struct ast* p,char *name,int type)
         set_var_type(p->id, type);
         set_arr_type(p->id, type);
     }
-    set_name_type(p->l, name,type);
-    set_name_type(p->r, name,type);
+    set_sym_type(p->l, name,type);
+    set_sym_type(p->r, name,type);
 }
 void set_node_type(struct ast* p,char *name,int type)
 {
@@ -42,8 +43,8 @@ void set_node_type(struct ast* p,char *name,int type)
     if(!strcmp(p->name,name)){
         p->type = type;
     }
-    set_name_type(p->l, name,type);
-    set_name_type(p->r, name,type);
+    set_node_type(p->l, name,type);
+    set_node_type(p->r, name,type);
 }
 void add_var(char *name, int type)
 {
@@ -52,6 +53,7 @@ void add_var(char *name, int type)
     temp->type = type;
     temp->var_next = var_p;
     var_p = temp;
+    printf("add var: %s, type: %d\n", name, type);
 }
 int exist_var(char *name)
 {
@@ -75,19 +77,27 @@ void set_var_type(char *name,int type)
 {
     for (var_type_p p = var_p; p; p = p->var_next)
     {
-        if (!strcmp(name, p->name))
-            p->type = type;
+        if (!strcmp(name, p->name)){
+            if(!p->type){
+                p->type = type;
+                printf("set var: %s, type: %d\n", name, type);
+            }
+            else
+                printf("var: %s already has a type: %d\n", name, p->type);
+        }
     }
 }
 void del_var(char *name)
 {
-    if(!var_p)
+    printf("func:del_var\n");
+    if (!var_p)
         return;
     if (!strcmp(name, var_p->name))
     {
         var_type_p temp = var_p;
         var_p = var_p->var_next;
         free(temp);
+        printf("del var: %s\n", name);
         return;
     }
     for (var_type_p p = var_p; p->var_next; p = p->var_next)
@@ -96,6 +106,7 @@ void del_var(char *name)
             var_type_p temp = p->var_next;
             p->var_next = p->var_next->var_next;
             free(temp);
+            printf("del var %s\n", name);
         }
     }
     return;
@@ -103,6 +114,7 @@ void del_var(char *name)
 
 void add_arr(char *name,int type,int dimen)
 {
+    printf("add arr: %s, dimen: %d\n",name,dimen);
     array_type_p temp = array_p;
     for (; temp; temp = temp->array_next)
     {
@@ -142,8 +154,13 @@ void set_arr_type(char *name,int type)
 {
     for (array_type_p p = array_p; p; p = p->array_next)
     {
-        if (!strcmp(name, p->name))
-            p->type = type;
+        if (!strcmp(name, p->name)){
+            if(!p->type){
+                p->type = type;
+                printf("set arr: %s, type: %d\n", name, type);
+            }
+            else printf("arr: %s already has a type: %d\n", name, p->type);
+        }
     }
 }
 int type_arr(char *name)

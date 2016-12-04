@@ -1,8 +1,7 @@
 %{
-    #include "gramtree.h"
     #include "semanteme.h"
     #include "lex.yy.c"
-    int flag=0;
+    int flag = 0;
 %}
 %union{
     struct ast* p;
@@ -33,12 +32,28 @@
 %left LP RP LB RB DOT
 %%
 Program:
-    ExtDefList {$$=new_ast("Program",1,$1);if(!flag) print_tree($$,1);};
+    ExtDefList {$$=new_ast("Program",1,$1);/*if(!flag) print_tree($$,1);*/};
 ExtDefList:
     ExtDef ExtDefList {$$=new_ast("ExtDefList",2,$1,$2);}
     | {$$=new_ast("ExtDefList",-1);};
 ExtDef:
-    Specifier ExtDecList SEMI {$$=new_ast("ExtDef",3,$1,$2,$3);}
+    Specifier ExtDecList SEMI {
+        $$=new_ast("ExtDef",3,$1,$2,$3);
+        if(!strcmp($1->l->name,"TYPE"))
+            if(!strcmp($1->l->id,"int"))
+            {//int variables
+                printf("specifier int\n");
+                set_sym_type($2,"ID",1);
+            }
+            else{//float variables
+                printf("specifier float\n");
+                set_sym_type($2,"ID",2);
+            }
+        else{//struct variables
+            printf("specifier struct\n");
+            set_sym_type($2,"ID",7);
+        }
+    }
     | Specifier SEMI {$$=new_ast("ExtDef",2,$1,$2);}
     | Specifier FunDec CompSt {$$=new_ast("ExtDef",3,$1,$2,$3);};
 ExtDecList:
@@ -57,21 +72,22 @@ Tag:
     ID {$$=new_ast("Tag",1,$1);};
 VarDec:
     ID {
+        $1->type = 0;
         $$=new_ast("VarDec",1,$1);
-        $1->type = 1;
         if (exist_var($1->id) || exist_arr($1->id))
         {
-            printf("Error type 3 at line %d: Redefined variable \"%s\"\n", $1->line, $1->id);
+            flag = 1;
+            printf("Error type 3 at line %d: Redefined variable \"%s\".\n", $1->line, $1->id);
         }
         else
-            add_var($1->id, 1);
+            add_var($1->id, 0);
     }
-| VarDec LB INT RB {
-    $1->type = 3;
-    $$ = new_ast("VarDec", 4, $1, $2, $3, $4);
-    del_var($1->name);
-    add_arr($1->id, 1, $3->a);
-};
+    | VarDec LB INT RB {
+        $1->type = 3;
+        $$ = new_ast("VarDec", 4, $1, $2, $3, $4);
+        del_var($1->l->id);
+        add_arr($1->id, 0, $3->a);
+    };
 FunDec:
     ID LP VarList RP {$$=new_ast("FunDec",4,$1,$2,$3,$4);}
     | ID LP RP {$$=new_ast("FunDec",3,$1,$2,$3);};
@@ -102,13 +118,16 @@ Def:
         if(!strcmp($1->l->name,"TYPE"))
             if(!strcmp($1->l->id,"int"))
             {//int variables
-                set_type($2,1);
+                printf("specifier int\n");
+                set_sym_type($2,"ID",1);
             }
             else{//float variables
-                set_type($2,2);
+                printf("specifier float\n");
+                set_sym_type($2,"ID",2);
             }
         else{//struct variables
-            set_type($2,4);
+            printf("specifier struct\n");
+            set_sym_type($2,"ID",7);
         }
     }
     | error SEMI {yyerrok;};
@@ -134,16 +153,50 @@ Exp : Exp ASSIGNOP Exp { $$ = new_ast("Exp", 3, $1, $2, $3); }
     | LP Exp RP {$$=new_ast("Exp",3,$1,$2,$3);}
     | MINUS Exp %prec UMINUS {$$=new_ast("Exp",2,$1,$2);}
     | NOT Exp {$$=new_ast("Exp",2,$1,$2);}
-    | ID LP Args RP {$$=new_ast("Exp",4,$1,$2,$3,$4);}
+    | ID LP Args RP {
+        
+        $$=new_ast("Exp",4,$1,$2,$3,$4);
+    }
     | ID LP RP {$$=new_ast("Exp",3,$1,$2,$3);}
-    | Exp LB Exp RB {$$=new_ast("Exp",4,$1,$2,$3,$4);}
-    | Exp DOT ID {$$=new_ast("Exp",3,$1,$2,$3);}
-    | ID {
-        $$=new_ast("Exp",1,$1);
-        if(!exist_var($1->id)){
-            printf("Error type 1 at line %d: Undefined variable \"%s\"\n", $1->line, $1->id);
+    | Exp LB Exp RB {
+        if($1->type==4){
+            printf("Error type 10 at line %d: \"%d\" is not an array.\n", $1->line, $1->a);
+            $1->type = 0;
             //flag = 1;
         }
+        else if($1->type==5) {
+            printf("Error type 10 at line %d: \"%f\" is not an array.\n", $1->line, $1->b);
+            $1->type = 0;
+            //flag = 1;
+        }
+        else if(!exist_var($1->id)){
+            printf("Error type 10 at line %d: \"%s\" is not an array.\n", $1->line, $1->id);
+            $1->type = 0;
+            //flag = 1;
+        }
+        else if(!exist_arr($1->id)){
+            printf("Error type 1 at line %d: Undefined variable \"%s\".\n", $1->line, $1->id);
+            $1->type = 0;
+            //flag = 1;
+        }
+        else if(exist_arr($1->id))
+            $1->type = type_arr($1->id);
+        else
+            $1->type = 0;
+        $$ = new_ast("Exp", 4, $1, $2, $3, $4);
+    }
+    | Exp DOT ID {$$=new_ast("Exp",3,$1,$2,$3);}
+    | ID {
+        if(!exist_var($1->id)||!exist_arr($1->id)){
+            printf("Error type 1 at line %d: Undefined variable \"%s\".\n", $1->line, $1->id);
+            $1->type = 0;
+            //flag = 1;
+        }
+        else if(exist_var($1->id))
+            $1->type = type_var($1->id);
+        else
+            $1->type = type_arr($1->id);
+        $$ = new_ast("Exp", 1, $1);
     }
     | INT {
         $$=new_ast("Exp",1,$1);

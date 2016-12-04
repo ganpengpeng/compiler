@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
+#include <string.h>
+#include <stdarg.h>
 #include "gramtree.h"
 
 struct ast *new_ast(char *name, int num,...)
@@ -22,7 +23,12 @@ struct ast *new_ast(char *name, int num,...)
         root->line = p->line;
         root->l = p;
         root->type = p->type;
-        root->id = p->id;
+        if(root->type==4)
+            root->a = p->a;
+        else if(root->type==5)
+            root->b = p->b;
+        else
+            root->id = p->id;
         while (num > 1)
         {
             p->r = va_arg(valist, struct ast *);
@@ -77,7 +83,6 @@ void print_tree(struct ast *root, int level)
                 printf("(%d)",root->line);
         }
         if(root->line!=-1) printf("\n");
-        sleep(3);
         print_tree(root->l, level + 1);
         print_tree(root->r,level);
     }
