@@ -1,6 +1,7 @@
-int i, j[5];
-//int i, j;
+struct mystruct{
+    int i;
+};
 int main()
 {
-    1 [1];
+    return 0;
 }

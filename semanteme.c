@@ -25,6 +25,19 @@ struct ast* search_name(struct ast* p,char *name)
         return j;
     return 0;
 }
+/*void add_sym_type(struct ast* p,char *name,int type,char* struct_name)
+{
+    if(!p)
+        return;
+    if(type==7){
+        if(!strcmp(p->name,name)){
+            add_struct(p->id, type);
+            set_arr_type(p->id, type);
+        }
+        set_sym_type(p->l, name,type);
+        set_sym_type(p->r, name,type);
+    }
+}*/
 void set_sym_type(struct ast* p,char *name,int type)
 {
     if(!p)
@@ -175,15 +188,43 @@ int type_arr(char *name)
     }
     return 0;
 }
-
-void add_struct(char *name,struct var_type *var)
+void digui(struct ast *p, var_type_p *var,int type){
+    if(!p)
+        return;
+    if(!strcmp(p->name,"ID")){
+        del_var(p->id);
+        printf("%s:%d\n", p->id, type);
+        var_type_p temp = (var_type_p)malloc(sizeof(struct var_type));
+        temp->name = p->id;
+        temp->type = type;
+        temp->var_next = *var;
+        *var = temp;
+    }
+    digui(p->l, var,type);
+    digui(p->r, var,type);
+    return;
+}
+void add_struct(char *struct_name,struct ast* deflist_p)
 {
     struct_type_p temp = (struct_type_p)malloc(sizeof(struct struct_type));
-    temp->name = name;
-    temp->var = var;
+    temp->name = struct_name;
     temp->struct_next = struct_p;
     struct_p = temp;
+    struct ast *def_p = deflist_p->l;
+    while (def_p != 0)
+    {
+        if (def_p->l->l->type==1)
+        {//int
+            digui(def_p->l->r, &(temp->var),1);
+        }
+        else{
+            digui(def_p->l->r, &(temp->var),2);
+        }
+        sleep(1);
+        def_p = def_p->r;
+    }
 }
+
 int exist_struct(char *name)
 {
     struct_type_p temp = struct_p;

@@ -63,7 +63,14 @@ Specifier:
     TYPE {$$=new_ast("Specifier",1,$1);}
     | StructSpecifier {$$=new_ast("Specifier",1,$1);};
 StructSpecifier:
-    STRUCT OptTag LC DefList RC {$$=new_ast("StructSpecifier",5,$1,$2,$3,$4,$5);}
+    STRUCT OptTag LC DefList RC {
+        if(exist_var($2->l->id)||exist_arr($2->l->id)){
+            printf("Error type 3 at line %d: Redefined variable \"%s\".\n", $1->line, $1->id);
+        }
+        else
+            add_struct($2->l->id, $4);
+        $$ = new_ast("StructSpecifier", 5, $1, $2, $3, $4, $5);
+    }
     | STRUCT Tag {$$=new_ast("StructSpecifier",2,$1,$2);};
 OptTag:
     ID {$$=new_ast("OptTag",1,$1);}
