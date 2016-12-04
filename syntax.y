@@ -43,15 +43,15 @@ ExtDef:
             if(!strcmp($1->l->id,"int"))
             {//int variables
                 printf("specifier int\n");
-                set_sym_type($2,"ID",1);
+                add_sym_type($2,"ID",1,0);
             }
             else{//float variables
-                printf("specifier float\n");
-                set_sym_type($2,"ID",2);
+                printf("ExtDef:specifier float\n");
+                add_sym_type($2,"ID",2,0);
             }
         else{//struct variables
-            printf("specifier struct\n");
-            set_sym_type($2,"ID",7);
+            printf("specifier struct %s\n",$1->id);
+            add_sym_type($2,"ID",7,$1->id);
         }
     }
     | Specifier SEMI {$$=new_ast("ExtDef",2,$1,$2);}
@@ -72,8 +72,10 @@ StructSpecifier:
             //printf("%s\n", $2->l->id);
         }
         $$ = new_ast("StructSpecifier", 5, $1, $2, $3, $4, $5);
-    }
-    | STRUCT Tag {$$=new_ast("StructSpecifier",2,$1,$2);};
+        $$->type = 7;
+        $$->id = $2->l->id;
+}
+| STRUCT Tag { $$ = new_ast("StructSpecifier", 2, $1, $2); };
 OptTag:
     ID {$$=new_ast("OptTag",1,$1);}
     | {$$=new_ast("OptTag",-1);};
@@ -96,7 +98,7 @@ VarDec:
         $1->type = 3;
         $$ = new_ast("VarDec", 4, $1, $2, $3, $4);
         //del_var($1->l->id);
-        add_arr($1->id, 0, $3->a);
+        add_arr($1->id, 0, $3->a,0);
     };
 FunDec:
     ID LP VarList RP {$$=new_ast("FunDec",4,$1,$2,$3,$4);}
@@ -129,15 +131,15 @@ Def:
             if(!strcmp($1->l->id,"int"))
             {//int variables
                 printf("specifier int\n");
-                set_sym_type($2,"ID",1);
+                add_sym_type($2,"ID",1,0);
             }
             else{//float variables
-                printf("specifier float\n");
-                set_sym_type($2,"ID",2);
+                printf("Def:specifier float\n");
+                add_sym_type($2,"ID",2,0);
             }
         else{//struct variables
             printf("specifier struct\n");
-            set_sym_type($2,"ID",7);
+            add_sym_type($2,"ID",7,$1->id);
         }
     }
     | error SEMI {yyerrok;};
