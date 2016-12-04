@@ -139,13 +139,26 @@ Dec:
     | VarDec ASSIGNOP Exp {
         $$=new_ast("Dec",3,$1,$2,$3);
     };
-Exp : Exp ASSIGNOP Exp { $$ = new_ast("Exp", 3, $1, $2, $3); }
-    | Exp AND Exp {$$=new_ast("Exp",3,$1,$2,$3);}
-    | Exp OR Exp {$$=new_ast("Exp",3,$1,$2,$3);}
-    | Exp RELOP Exp {$$=new_ast("Exp",3,$1,$2,$3);}
-    | Exp PLUS Exp {
-        $$=new_ast("Exp",3,$1,$2,$3);
-
+Exp : Exp ASSIGNOP Exp { 
+        if($1->type==4||$1->type==5){
+            printf("Error type 6 at line %d: The left-hand side of an assignment must be a variable.\n", $1->line);
+        }
+        else if($1->type&&$3->type&&$1->type!=$3->type){
+            printf("Error type 5 at line %d: Type mismatched for assignment.\n",$1->line);
+        }
+        $$ = new_ast("Exp", 3, $1, $2, $3);
+        $$->type = 0;
+    }
+    | Exp AND Exp { $$ = new_ast("Exp", 3, $1, $2, $3); }
+    | Exp OR Exp { $$ = new_ast("Exp", 3, $1, $2, $3); }
+    | Exp RELOP Exp { $$ = new_ast("Exp", 3, $1, $2, $3); }
+    | Exp PLUS Exp
+    {
+        $$ = new_ast("Exp", 3, $1, $2, $3);
+        if($1->type&&$3->type&&$1->type!=$3->type){
+            $$->type = 0;
+            printf("Error type 7 at line %d: Type mismatched for operands.\n", $1->line);
+        }
     }
     | Exp MINUS Exp {$$=new_ast("Exp",3,$1,$2,$3);}
     | Exp STAR Exp {$$=new_ast("Exp",3,$1,$2,$3);}
@@ -159,35 +172,46 @@ Exp : Exp ASSIGNOP Exp { $$ = new_ast("Exp", 3, $1, $2, $3); }
     }
     | ID LP RP {$$=new_ast("Exp",3,$1,$2,$3);}
     | Exp LB Exp RB {
+        $$ = new_ast("Exp", 4, $1, $2, $3, $4);
         if($1->type==4){
             printf("Error type 10 at line %d: \"%d\" is not an array.\n", $1->line, $1->a);
-            $1->type = 0;
+            $$->type = 0;
             //flag = 1;
         }
         else if($1->type==5) {
             printf("Error type 10 at line %d: \"%f\" is not an array.\n", $1->line, $1->b);
-            $1->type = 0;
+            $$->type = 0;
             //flag = 1;
         }
-        else if(!exist_var($1->id)){
+        else if(exist_var($1->id)){
             printf("Error type 10 at line %d: \"%s\" is not an array.\n", $1->line, $1->id);
-            $1->type = 0;
+            $$->type = 0;
             //flag = 1;
         }
         else if(!exist_arr($1->id)){
             printf("Error type 1 at line %d: Undefined variable \"%s\".\n", $1->line, $1->id);
-            $1->type = 0;
+            $$->type = 0;
             //flag = 1;
         }
         else if(exist_arr($1->id))
-            $1->type = type_arr($1->id);
+            $$->type = type_arr($1->id);
         else
-            $1->type = 0;
-        $$ = new_ast("Exp", 4, $1, $2, $3, $4);
+            $$->type = 0;
+        if($3->type==5){
+            $$->type = 0;
+            printf("Error type 12 at line %d: \"%f\" is not an intger.\n", $3->line,$3->b);
+        }
+        else if($3->type==2){
+            struct ast *temp = search_name($3, "ID");
+            if(temp){
+                $$->type = 0;
+                printf("Error type 12 at line %d: \"%s\" is not an intger.\n", $3->line,temp->id);
+            }
+        }
     }
     | Exp DOT ID {$$=new_ast("Exp",3,$1,$2,$3);}
     | ID {
-        if(!exist_var($1->id)||!exist_arr($1->id)){
+        if(!exist_var($1->id)&&!exist_arr($1->id)){
             printf("Error type 1 at line %d: Undefined variable \"%s\".\n", $1->line, $1->id);
             $1->type = 0;
             //flag = 1;

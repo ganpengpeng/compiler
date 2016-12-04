@@ -6,8 +6,8 @@
     1:int,
     2:float,
     3:array,
-    4:c_int,
-    5:c_float,
+    4:const int,
+    5:const float,
     6:fun,
     7:struct,
     8:ID
@@ -46,7 +46,8 @@ struct fun_type
     struct var_type *para;
     struct fun_type *fun_next;
 };
-void set_sym_type(struct ast *p,char* name, int type);
+struct ast *search_name(struct ast *p, char *name);
+void set_sym_type(struct ast *p, char *name, int type);
 void set_node_type(struct ast *p,char* name, int type);
 void add_var(char *name, int type);
 int exist_var(char *name);
