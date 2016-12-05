@@ -1,8 +1,7 @@
-struct mystruct{
+/*struct mystruct{
     int i;
-};
-int main()
+};*/
+int fun(int i, int j, int k)
 {
-    int i;
     return 0;
 }

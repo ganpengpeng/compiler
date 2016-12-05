@@ -45,8 +45,10 @@ struct ast *new_ast(char *name, int num,...)
             strcpy(root->id, yytext);
             if (!strcmp(root->id, "int"))
                 root->type = 1;
-            else
+            else if (!strcmp(root->id, "float"))
                 root->type = 2;
+            else
+                root->type = 0;
             root->l = root->r = 0;
         }
         else if (!strcmp(name, "INT"))

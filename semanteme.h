@@ -69,5 +69,6 @@ int exist_struct_field(char *name, char *field);
 int exist_struct(char *name);
 void add_fun(char *fun_name, int isdef, int return_type, struct ast *varlist_p);
 int exist_fun(char *fun_name);
+int exist_fun_para(char *fun_name,char *para_name);
 int match_fun(struct ast *p, char *fun_name);
 #endif

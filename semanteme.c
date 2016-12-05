@@ -10,7 +10,7 @@ var_type_p var_p = NULL;
 struct_type_p struct_p = NULL;
 array_type_p array_p = NULL;
 fun_type_p fun_p = NULL;
-char buf[500];
+char buf1[50];
 extern int flag1;
 struct ast *search_name(struct ast *p, char *name)
 {//down to find name and return pointer to node
@@ -78,10 +78,10 @@ void add_var(char *name, int type,char *struct_name,int line)
         return;
     }
     if(exist_var(name)){
-        memset(buf, 0, 500);
-        sprintf(buf, "Error type 3 at line %d: Redefined variable \"%s\".\n", line, name);
+        memset(buf1, 0, 50);
+        sprintf(buf1, "Error type 3 at line %d: Redefined variable \"%s\".\n", line, name);
         flag1 = 0;
-        //printf("%s\n", buf);
+        //printf("%s\n", buf1);
         return;
     }
     else if(exist_fun(name)){
@@ -366,63 +366,113 @@ void add_fun(char *fun_name,int isdef,int return_type,struct ast* varlist_p)
     temp->return_type = return_type;
     temp->fun_next = fun_p;
     fun_p = temp;
-    temp->para = 0;
+    //void node
+    temp->para = (var_type_p)malloc(sizeof(struct var_type));
+    temp->para->var_next = 0;
     if (!varlist_p)
         return;
     else
     {
         struct ast *para_p = varlist_p->l;
+        var_type_p temp_var = temp->para;
         while (para_p != 0)
         {
             if (para_p->l->l->type==1)
             {//int
                 //printf("add_struct_var:1\n");
-                var_type_p temp_var = temp->para;
-                temp->para = (var_type_p)malloc(sizeof(struct var_type));
-                temp->para->name = para_p->l->r->l->id;
-                temp->para->type = 1;
-                printf("%s:1\n", temp->para->name);
-                temp->para->var_next = temp_var;
+                temp_var->var_next=(var_type_p)malloc(sizeof(struct var_type));
+                temp_var->var_next->name = para_p->l->r->l->id;
+                temp_var->var_next->type = 1;
+                temp_var->var_next->var_next = 0;
+                //printf("%s:1\n", temp_var->var_next->name);
+                temp_var = temp_var->var_next;
             }
             else{
                 //printf("add_struct_var:2\n");
-                var_type_p temp_var = temp->para;
-                temp->para = (var_type_p)malloc(sizeof(struct var_type));
-                temp->para->name = para_p->l->r->l->id;
-                temp->para->type = 2;
-                printf("%s:2\n", temp->para->name);
-                temp->para->var_next = temp_var;
+                temp_var->var_next=(var_type_p)malloc(sizeof(struct var_type));
+                temp_var->var_next->name = para_p->l->r->l->id;
+                temp_var->var_next->type = 2;
+                temp_var->var_next->var_next = 0;
+                //printf("%s:1\n", temp_var->var_next->name);
+                temp_var = temp_var->var_next;
             }
-            para_p = para_p->r;
+            if(para_p->r)
+                para_p = para_p->r->r->l;
+            else
+                para_p = 0;
         }
     }
     printf("fun_name:%s,return_type:%d\n", temp->name, temp->return_type);
-    var_type_p printf_p = temp->para;
+    var_type_p printf_p = temp->para->var_next;
     while (printf_p){
         printf("para_name:%s,type:%d\n", printf_p->name, printf_p->type);
         printf_p = printf_p->var_next;
     }
 }
-int match_fun(struct ast *args_p,char *fun_name){
+int match_fun(struct ast *exp_p,char *fun_name){
     var_type_p para_p = 0;
     for (fun_type_p p = fun_p; p; p = p->fun_next)
     {
         if(!strcmp(p->name,fun_name)){
-            para_p = p->para;
+            para_p = p->para->var_next;
             break;
         }
     }
-    if(!para_p)
-        return 0;
-    /*while (args_p)
+    if(!para_p&&!exp_p)
+        return 1;
+    while (exp_p && para_p)
     {
-        if(args_p->l->type)
-    }*/
+        printf("exp_p->type:%d, para_p->type:%d\n", exp_p->type, para_p->type);
+        if (exp_p->type == para_p->type || (exp_p->type - 3) == para_p->type)
+        {
+            if(exp_p->r)
+                exp_p = exp_p->r->r->l;
+            else
+                exp_p = 0;
+            para_p = para_p->var_next;
+        }
+        else
+            break;
+    }
+    if(!exp_p)
+        printf("exp_p: 0\n");
+    if (!exp_p && !para_p)
+        return 1;
+    if(exp_p&&para_p){
+        if(exp_p->type==1)
+        printf("Error type 9 at line %d: There is argument int, but fuction float.\n", exp_p->line);
+        else 
+        printf("Error type 9 at line %d: There is argument float, but fuction int.\n", exp_p->line);
+    }
+    else if(exp_p){
+        printf("Error type 9 at line %d: \"%s\" has too many arguments.\n", exp_p->line, fun_name);
+    }
+    else
+        printf("Error type 9 at line %d: arguments of \"%s\" are not enough.\n", exp_p->line, fun_name);
+    return 0;
 }
 int exist_fun(char *fun_name){
     for (fun_type_p p = fun_p; p; p = p->fun_next){
         if(!strcmp(p->name,fun_name)){
             return 1;
+        }
+    }
+    return 0;
+}
+int exist_fun_para(char *fun_name,char *para_name){
+    var_type_p para_p = 0;
+    for (fun_type_p p = fun_p; p; p = p->fun_next)
+    {
+        if(!strcmp(p->name,fun_name)){
+            para_p = p->para->var_next;
+        }
+    }
+    if(!para_p)
+        return 0;
+    for (; para_p; para_p = para_p->var_next)
+    {
+        if(!strcmp(para_p->name,para_name)){
+            return para_p->type;
         }
     }
     return 0;

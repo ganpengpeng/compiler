@@ -3,7 +3,9 @@
     #include "lex.yy.c"
     int flag = 0;
     int flag1 = 0;
-    extern char buf[500];
+    int flag2 = 0;
+    extern char buf1[50];
+    char buf2[50];
 %}
 %union{
     struct ast* p;
@@ -42,7 +44,7 @@ ExtDef:
     Specifier ExtDecList SEMI {
         $$=new_ast("ExtDef",3,$1,$2,$3);
         if(!flag1){
-            printf("%s", buf);
+            printf("%s", buf1);
             flag1 = 1;
         }
         if(!strcmp($1->l->name,"TYPE"))
@@ -73,12 +75,37 @@ ExtDef:
         //printf("ExtDef start\n");
         if (return_p)
         {
-            ture_return_type = return_p->r->type;
+            if(!strcmp(return_p->r->l->name,"ID")){
+                if(exist_fun_para(fun_name,return_p->r->l->id)){
+                    ture_return_type = exist_fun_para(fun_name,return_p->r->l->id);
+                }
+                else{
+                    if(flag2){
+                        printf("%s", buf2);
+                        flag2 = 0;
+                    }
+                    ture_return_type = return_p->r->type;
+                }
+            }
+            else{
+                if(flag2){
+                        printf("%s", buf2);
+                        flag2 = 0;
+                }
+                ture_return_type = return_p->r->type;
+            }
+            
+        }
+        else{
+            if(flag2){
+                printf("%s", buf2);
+                flag2 = 0;
+            }
         }
         if(!return_p){
             printf("Error type 8 at line %d: Function \"%s\" has no return statement.\n", $3->l->r->r->r->line, fun_name);
         }
-        else if(!(return_type==1&&ture_return_type==4||return_type==2&&ture_return_type==5))
+        else if(ture_return_type&&!(return_type==1&&ture_return_type==4||return_type==2&&ture_return_type==5))
         {
             printf("Error type 8 at line %d: Type mismatched for return.\n", return_p->line);
         }
@@ -166,7 +193,7 @@ CompSt:
         //printf("CompSt start\n");
         if (!flag1)
         {
-            printf("%s", buf);
+            printf("%s", buf1);
             flag1 = 1;
         }
         $$=new_ast("CompSt",4,$1,$2,$3,$4);
@@ -257,13 +284,32 @@ Exp : Exp ASSIGNOP Exp {
     | MINUS Exp %prec UMINUS {$$=new_ast("Exp",2,$1,$2);}
     | NOT Exp {$$=new_ast("Exp",2,$1,$2);}
     | ID LP Args RP {
-        if(exist_var($1->id)||exist_arr($1->id)||exist_struct($1->id)){
+        /*struct ast *p = $3->l;
+        while (p)
+        {
+            if(p->type==4){
+                printf("const int: %d\n", p->a);
+            }
+            else if(p->type==5){
+                printf("const float: %f\n", p->b);
+            }
+            else {
+                printf("%s: %d\n", p->id, p->type);
+            }
+            if(p->r)
+                p = p->r->r->l;
+            else
+                p = 0;
+        }*/
+        if (exist_var($1->id) || exist_arr($1->id) || exist_struct($1->id))
+        {
             printf("Error type 11 at line %d: \"%s\" is not a function.\n", $1->line, $1->id);
         }
         else if(!exist_fun($1->id)){
             printf("Error type 2 at line %d: Undefined function \"%s\".\n", $1->line,$1->id);
         }
-        match_fun($3, $1->id);
+        else
+            match_fun($3->l, $1->id);
         $$ = new_ast("Exp", 4, $1, $2, $3, $4);
     }
     | ID LP RP {$$=new_ast("Exp",3,$1,$2,$3);}
@@ -316,7 +362,9 @@ Exp : Exp ASSIGNOP Exp {
     }
     | ID {
         if(!exist_var($1->id)&&!exist_arr($1->id)){
-            printf("Error type 1 at line %d: Undefined variable \"%s\".\n", $1->line, $1->id);
+            memset(buf2, 0, 50);
+            sprintf(buf2,"Error type 1 at line %d: Undefined variable \"%s\".\n", $1->line, $1->id);
+            flag2 = 1;
             $1->type = 0;
             //flag = 1;
         }
