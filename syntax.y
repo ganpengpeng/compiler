@@ -109,8 +109,9 @@ ExtDef:
         {
             printf("Error type 8 at line %d: Type mismatched for return.\n", return_p->line);
         }
+        
         struct ast *varlist_p = 0;
-        //printf("fun_name:%s,return_type:%d,ture_return_type:%d\n", fun_name, return_type,ture_return_type);
+        printf("fun_name:%s,return_type:%d,ture_return_type:%d,line:%d\n", fun_name, return_type,ture_return_type,$2->line);
         if (!strcmp($2->l->r->r->name, "VarList"))
             varlist_p = $2->l->r->r;
         if (exist_fun(fun_name))
