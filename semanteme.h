@@ -65,5 +65,6 @@ void set_arr_type(char *name, int type,char *struct_name);
 int type_arr(char *name);
 void add_struct_var(struct ast *p, struct var_type **var, int type);
 void add_struct(char *name, struct ast *var);
+int exist_struct_field(char *name, char *field);
 int exist_struct(char *name);
 #endif

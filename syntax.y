@@ -61,7 +61,10 @@ ExtDef:
         }
     }
     | Specifier SEMI {$$=new_ast("ExtDef",2,$1,$2);}
-    | Specifier FunDec CompSt {$$=new_ast("ExtDef",3,$1,$2,$3);};
+    | Specifier FunDec CompSt {
+        //if()
+        $$=new_ast("ExtDef",3,$1,$2,$3);
+    };
 ExtDecList:
     VarDec {$$=new_ast("ExtDecList",1,$1);}
     | VarDec COMMA ExtDecList {$$=new_ast("ExtDecList",3,$1,$2,$3);};
@@ -157,7 +160,7 @@ DefList:
         else if($1->l->l->type==2){
             add_sym_type($1->l->r, "ID", 2, 0);
         }
-        else{
+        else if(exist_struct($1->l->l->l->r->id)){
             add_sym_type($1->l->r, "ID", 7, $1->l->l->l->r->id);
         }
         $$=new_ast("DefList",2,$1,$2);
@@ -263,7 +266,15 @@ Exp : Exp ASSIGNOP Exp {
             }
         }
     }
-    | Exp DOT ID {$$=new_ast("Exp",3,$1,$2,$3);}
+    | Exp DOT ID {
+        $$=new_ast("Exp",3,$1,$2,$3);
+        if(type_var($1->l->id)!=7){
+            printf("Error type 13 at line %d: Illegal use of \".\".\n", $2->line);
+        }
+        else if(!exist_struct_field($1->l->id,$3->id)){
+            printf("Error type 14 at line %d: Non-existent field \"%s\".\n", $3->line, $3->id);
+        }
+    }
     | ID {
         if(!exist_var($1->id)&&!exist_arr($1->id)){
             printf("Error type 1 at line %d: Undefined variable \"%s\".\n", $1->line, $1->id);

@@ -302,7 +302,25 @@ void add_struct(char *struct_name,struct ast* deflist_p)
             def_p = 0;
     }
 }
-
+int exist_struct_field(char *name,char *field)
+{
+    for (var_type_p p = var_p; p;p=p->var_next){
+        if(!strcmp(p->name,name)){
+            char *struct_name = p->struct_name;
+            for (struct_type_p sp = struct_p; sp;sp=sp->struct_next){
+                if(!strcmp(sp->name,struct_name)){
+                    var_type_p field_p = sp->var;
+                    for (; field_p; field_p = field_p->var_next){
+                        if(!strcmp(field_p->name,field)){
+                            return 1;
+                        }
+                    }
+                    return 0;
+                }
+            }
+        }
+    }
+}
 int exist_struct(char *name)
 {
     struct_type_p temp = struct_p;
@@ -314,4 +332,57 @@ int exist_struct(char *name)
         }
     }
     return 0;
+}
+void add_fun_para(struct ast *p, var_type_p *var,int type){
+    if(!p)
+        return;
+    if(!strcmp(p->name,"ID")){
+        del_var(p->id);
+        //del_arr(p->id);
+        if(exist_struct_var(var,p->id))
+            printf("Error type 15 at line %d: Redefined field \"%s\".\n", p->line, p->id);
+        else {
+            printf("struct var, %s:%d\n", p->id, type);
+            var_type_p temp = (var_type_p)malloc(sizeof(struct var_type));
+            temp->name = p->id;
+            temp->type = type;
+            temp->var_next = *var;
+            *var = temp;
+        }
+    }
+    add_struct_var(p->l, var,type);
+    add_struct_var(p->r, var,type);
+    return;
+}
+void add_fun(char *fun_name,int isdef,int return_type,struct ast* varlist_p)
+{
+    fun_type_p temp = (fun_type_p)malloc(sizeof(struct fun_type));
+    temp->name = fun_name;
+    temp->isdef = isdef;
+    temp->return_type = return_type;
+    temp->fun_next = fun_p;
+    fun_p = temp;
+    if(!varlist_p)
+        temp->para = 0;
+    else{
+        struct ast *para_p = varlist_p->l;
+        while (para_p != 0)
+        {
+            if (def_p->l->l->type==1)
+            {//int
+                //printf("add_struct_var:1\n");
+                add_struct_var(def_p->l->r, &(temp->var), 1);
+            }
+            else{
+                //printf("add_struct_var:2\n");
+                add_struct_var(def_p->l->r, &(temp->var),2);
+            }
+            if(def_p->r)
+                def_p = def_p->r->l;
+            else
+                def_p = 0;
+        }
+    }
+    
+    
 }

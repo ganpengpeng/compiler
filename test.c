@@ -3,5 +3,6 @@ struct mystruct{
 };
 int main()
 {
+    int i;
     return 0;
 }
