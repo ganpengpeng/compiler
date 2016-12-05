@@ -2,6 +2,8 @@
     #include "semanteme.h"
     #include "lex.yy.c"
     int flag = 0;
+    int flag1 = 0;
+    extern char buf[500];
 %}
 %union{
     struct ast* p;
@@ -39,6 +41,10 @@ ExtDefList:
 ExtDef:
     Specifier ExtDecList SEMI {
         $$=new_ast("ExtDef",3,$1,$2,$3);
+        if(!flag1){
+            printf("%s", buf);
+            flag1 = 1;
+        }
         if(!strcmp($1->l->name,"TYPE"))
             if(!strcmp($1->l->id,"int"))
             {//int variables
@@ -64,18 +70,30 @@ Specifier:
     | StructSpecifier {$$=new_ast("Specifier",1,$1);};
 StructSpecifier:
     STRUCT OptTag LC DefList RC {
-        if(exist_var($2->l->id)||exist_arr($2->l->id)){
+        flag1 = 1;
+        if (exist_var($2->l->id) || exist_arr($2->l->id))
+        {
             printf("Error type 3 at line %d: Redefined variable \"%s\".\n", $1->line, $1->id);
+            }
+            else if(exist_struct($2->l->id)){
+                printf("Error type 16 at line %d: Duplicated name \"%s\".\n", $2->line, $2->l->id);
+            }
+            else{
+                add_struct($2->l->id, $4);
+                //printf("%s\n", $2->l->id);
+            }
+            $$ = new_ast("StructSpecifier", 5, $1, $2, $3, $4, $5);
+            $$->type = 7;
+            $$->id = $2->l->id;
         }
-        else{
-            add_struct($2->l->id, $4);
-            //printf("%s\n", $2->l->id);
+    | STRUCT Tag { 
+        $$ = new_ast("StructSpecifier", 2, $1, $2);
+        //printf("%s\n", $2->id);
+        if (!exist_struct($2->id))
+        {
+            printf("Error type 17 at line %d: Undefined structure \"%s\".\n", $2->line, $2->id);
         }
-        $$ = new_ast("StructSpecifier", 5, $1, $2, $3, $4, $5);
-        $$->type = 7;
-        $$->id = $2->l->id;
-}
-| STRUCT Tag { $$ = new_ast("StructSpecifier", 2, $1, $2); };
+    };
 OptTag:
     ID {$$=new_ast("OptTag",1,$1);}
     | {$$=new_ast("OptTag",-1);};
@@ -109,7 +127,15 @@ VarList:
 ParamDec:
     Specifier VarDec {$$=new_ast("ParamDec",2,$1,$2);};
 CompSt:
-    LC DefList StmtList RC {$$=new_ast("CompSt",4,$1,$2,$3,$4);};
+    LC DefList StmtList RC {
+        //printf("CompSt\n");
+        if (!flag1)
+        {
+            printf("%s", buf);
+            flag1 = 1;
+        }
+        $$=new_ast("CompSt",4,$1,$2,$3,$4);
+    };
 StmtList:
     Stmt StmtList {$$=new_ast("StmtList",2,$1,$2);}
     | {$$=new_ast("StmtList",-1);};
@@ -122,12 +148,25 @@ Stmt:
     | WHILE LP Exp RP Stmt {$$=new_ast("Stmt",5,$1,$2,$3,$4,$5);}
     | error SEMI {yyerrok;};
 DefList:
-    Def DefList {$$=new_ast("DefList",2,$1,$2);}
+    Def DefList {
+        if($1->l->l->type==1){
+            //printf("qianmian\n");
+            add_sym_type($1->l->r, "ID", 1, 0);
+            //printf("houmian\n");
+        }
+        else if($1->l->l->type==2){
+            add_sym_type($1->l->r, "ID", 2, 0);
+        }
+        else{
+            add_sym_type($1->l->r, "ID", 7, $1->l->l->l->r->id);
+        }
+        $$=new_ast("DefList",2,$1,$2);
+    }
     | {$$=new_ast("DefList",-1);};
 Def:
     Specifier DecList SEMI {
         $$=new_ast("Def",3,$1,$2,$3);
-        if(!strcmp($1->l->name,"TYPE"))
+        /*if(!strcmp($1->l->name,"TYPE"))
             if(!strcmp($1->l->id,"int"))
             {//int variables
                 printf("specifier int\n");
@@ -140,7 +179,7 @@ Def:
         else{//struct variables
             printf("specifier struct\n");
             add_sym_type($2,"ID",7,$1->id);
-        }
+        }*/
     }
     | error SEMI {yyerrok;};
 DecList:
@@ -167,10 +206,13 @@ Exp : Exp ASSIGNOP Exp {
     | Exp PLUS Exp
     {
         $$ = new_ast("Exp", 3, $1, $2, $3);
-        if($1->type&&$3->type&&$1->type!=$3->type){
-            $$->type = 0;
-            printf("Error type 7 at line %d: Type mismatched for operands.\n", $1->line);
-        }
+        //printf("$1->type:%d, $3->type:%d\n", $1->type, $3->type);
+        if ($1->type && $3->type && $1->type != $3->type)
+            if(!($1->type == 1&&$3->type==4||$1->type == 4&&$3->type==1||$1->type == 2&&$3->type==5||$1->type == 5&&$3->type==2))
+            {
+                $$->type = 0;
+                printf("Error type 7 at line %d: Type mismatched for operands.\n", $1->line);
+            }
     }
     | Exp MINUS Exp {$$=new_ast("Exp",3,$1,$2,$3);}
     | Exp STAR Exp {$$=new_ast("Exp",3,$1,$2,$3);}

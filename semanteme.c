@@ -10,7 +10,9 @@ var_type_p var_p = NULL;
 struct_type_p struct_p = NULL;
 array_type_p array_p = NULL;
 fun_type_p fun_p = NULL;
-struct ast* search_name(struct ast* p,char *name)
+char buf[500];
+extern int flag1;
+struct ast *search_name(struct ast *p, char *name)
 {//down to find name and return pointer to node
     if(!p)
         return 0;
@@ -29,17 +31,20 @@ void add_sym_type(struct ast* p,char *name,int type,char* struct_name)
 {
     if(!p)
         return;
-    if(!strcmp(p->name,name)){
+    //printf("%s\n", p->name);
+    if (!strcmp(p->name, name))
+    {
         if(type==7){
-            add_var(p->id, type,struct_name);
+            add_var(p->id, type,struct_name,p->line);
             set_arr_type(p->id, type,struct_name);
         }
         else if(type==1){
-            add_var(p->id, type,struct_name);
+            printf("func:add_sym_type, add %s:int\n", p->id);
+            add_var(p->id, type, struct_name, p->line);
             set_arr_type(p->id, type,struct_name);
         }
         else if(type==2){
-            add_var(p->id, type,struct_name);
+            add_var(p->id, type,struct_name,p->line);
             set_arr_type(p->id, type,struct_name);
         }
     }
@@ -67,8 +72,18 @@ void set_node_type(struct ast* p,char *name,int type)
     set_node_type(p->l, name,type);
     set_node_type(p->r, name,type);
 }
-void add_var(char *name, int type,char *struct_name)
+void add_var(char *name, int type,char *struct_name,int line)
 {
+    if(exist_arr(name)){
+        return;
+    }
+    if(exist_var(name)){
+        memset(buf, 0, 500);
+        sprintf(buf, "Error type 3 at line %d: Redefined variable \"%s\".\n", line, name);
+        flag1 = 0;
+        //printf("%s\n", buf);
+        return;
+    }
     var_type_p temp = (var_type_p)malloc(sizeof(struct var_type));
     temp->name = name;
     temp->type = type;
@@ -233,18 +248,31 @@ int type_arr(char *name)
     }
     return 0;
 }
+int exist_struct_var(var_type_p *var, char *name)
+{
+    for (var_type_p p = *var; p; p = p->var_next)
+    {
+        if (!strcmp(name, p->name))
+            return 1;
+    }
+    return 0;
+}
 void add_struct_var(struct ast *p, var_type_p *var,int type){
     if(!p)
         return;
     if(!strcmp(p->name,"ID")){
         del_var(p->id);
-        del_arr(p->id);
-        printf("struct,%s:%d\n", p->id, type);
-        var_type_p temp = (var_type_p)malloc(sizeof(struct var_type));
-        temp->name = p->id;
-        temp->type = type;
-        temp->var_next = *var;
-        *var = temp;
+        //del_arr(p->id);
+        if(exist_struct_var(var,p->id))
+            printf("Error type 15 at line %d: Redefined field \"%s\".\n", p->line, p->id);
+        else {
+            printf("struct var, %s:%d\n", p->id, type);
+            var_type_p temp = (var_type_p)malloc(sizeof(struct var_type));
+            temp->name = p->id;
+            temp->type = type;
+            temp->var_next = *var;
+            *var = temp;
+        }
     }
     add_struct_var(p->l, var,type);
     add_struct_var(p->r, var,type);
@@ -261,14 +289,17 @@ void add_struct(char *struct_name,struct ast* deflist_p)
     {
         if (def_p->l->l->type==1)
         {//int
-            printf("add_struct_var:1\n");
+            //printf("add_struct_var:1\n");
             add_struct_var(def_p->l->r, &(temp->var), 1);
         }
         else{
-            printf("add_struct_var:2\n");
+            //printf("add_struct_var:2\n");
             add_struct_var(def_p->l->r, &(temp->var),2);
         }
-        def_p = def_p->r;
+        if(def_p->r)
+            def_p = def_p->r->l;
+        else
+            def_p = 0;
     }
 }
 

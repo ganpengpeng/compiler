@@ -67,8 +67,10 @@
     #include "semanteme.h"
     #include "lex.yy.c"
     int flag = 0;
+    int flag1 = 0;
+    extern char buf[500];
 
-#line 72 "syntax.tab.c" /* yacc.c:339  */
+#line 74 "syntax.tab.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -140,11 +142,11 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 6 "syntax.y" /* yacc.c:355  */
+#line 8 "syntax.y" /* yacc.c:355  */
 
     struct ast* p;
 
-#line 148 "syntax.tab.c" /* yacc.c:355  */
+#line 150 "syntax.tab.c" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -175,7 +177,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 179 "syntax.tab.c" /* yacc.c:358  */
+#line 181 "syntax.tab.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -475,15 +477,15 @@ static const yytype_uint8 yytranslate[] =
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_uint8 yyrline[] =
+static const yytype_uint16 yyrline[] =
 {
-       0,    35,    35,    37,    38,    40,    57,    58,    60,    61,
-      63,    64,    66,    78,    80,    81,    83,    85,    97,   104,
-     105,   107,   108,   110,   112,   114,   115,   117,   118,   119,
-     120,   121,   122,   123,   125,   126,   128,   145,   147,   148,
-     150,   151,   154,   164,   165,   166,   167,   175,   176,   177,
-     178,   179,   180,   181,   185,   186,   224,   225,   237,   240,
-     242,   243
+       0,    37,    37,    39,    40,    42,    63,    64,    66,    67,
+      69,    70,    72,    89,    98,    99,   101,   103,   115,   122,
+     123,   125,   126,   128,   130,   140,   141,   143,   144,   145,
+     146,   147,   148,   149,   151,   165,   167,   184,   186,   187,
+     189,   190,   193,   203,   204,   205,   206,   218,   219,   220,
+     221,   222,   223,   224,   228,   229,   267,   268,   280,   283,
+     285,   286
 };
 #endif
 
@@ -1460,27 +1462,31 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 35 "syntax.y" /* yacc.c:1646  */
+#line 37 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("Program",1,(yyvsp[0].p));/*if(!flag) print_tree($$,1);*/}
-#line 1466 "syntax.tab.c" /* yacc.c:1646  */
+#line 1468 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 37 "syntax.y" /* yacc.c:1646  */
+#line 39 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("ExtDefList",2,(yyvsp[-1].p),(yyvsp[0].p));}
-#line 1472 "syntax.tab.c" /* yacc.c:1646  */
+#line 1474 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 38 "syntax.y" /* yacc.c:1646  */
+#line 40 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("ExtDefList",-1);}
-#line 1478 "syntax.tab.c" /* yacc.c:1646  */
+#line 1480 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 40 "syntax.y" /* yacc.c:1646  */
+#line 42 "syntax.y" /* yacc.c:1646  */
     {
         (yyval.p)=new_ast("ExtDef",3,(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));
+        if(!flag1){
+            printf("%s", buf);
+            flag1 = 1;
+        }
         if(!strcmp((yyvsp[-2].p)->l->name,"TYPE"))
             if(!strcmp((yyvsp[-2].p)->l->id,"int"))
             {//int variables
@@ -1496,88 +1502,100 @@ yyreduce:
             add_sym_type((yyvsp[-1].p),"ID",7,(yyvsp[-2].p)->id);
         }
     }
-#line 1500 "syntax.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 6:
-#line 57 "syntax.y" /* yacc.c:1646  */
-    {(yyval.p)=new_ast("ExtDef",2,(yyvsp[-1].p),(yyvsp[0].p));}
 #line 1506 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
-  case 7:
-#line 58 "syntax.y" /* yacc.c:1646  */
-    {(yyval.p)=new_ast("ExtDef",3,(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
+  case 6:
+#line 63 "syntax.y" /* yacc.c:1646  */
+    {(yyval.p)=new_ast("ExtDef",2,(yyvsp[-1].p),(yyvsp[0].p));}
 #line 1512 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
-  case 8:
-#line 60 "syntax.y" /* yacc.c:1646  */
-    {(yyval.p)=new_ast("ExtDecList",1,(yyvsp[0].p));}
+  case 7:
+#line 64 "syntax.y" /* yacc.c:1646  */
+    {(yyval.p)=new_ast("ExtDef",3,(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
 #line 1518 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
-  case 9:
-#line 61 "syntax.y" /* yacc.c:1646  */
-    {(yyval.p)=new_ast("ExtDecList",3,(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
+  case 8:
+#line 66 "syntax.y" /* yacc.c:1646  */
+    {(yyval.p)=new_ast("ExtDecList",1,(yyvsp[0].p));}
 #line 1524 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
-  case 10:
-#line 63 "syntax.y" /* yacc.c:1646  */
-    {(yyval.p)=new_ast("Specifier",1,(yyvsp[0].p));}
+  case 9:
+#line 67 "syntax.y" /* yacc.c:1646  */
+    {(yyval.p)=new_ast("ExtDecList",3,(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
 #line 1530 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
-  case 11:
-#line 64 "syntax.y" /* yacc.c:1646  */
+  case 10:
+#line 69 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("Specifier",1,(yyvsp[0].p));}
 #line 1536 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
+  case 11:
+#line 70 "syntax.y" /* yacc.c:1646  */
+    {(yyval.p)=new_ast("Specifier",1,(yyvsp[0].p));}
+#line 1542 "syntax.tab.c" /* yacc.c:1646  */
+    break;
+
   case 12:
-#line 66 "syntax.y" /* yacc.c:1646  */
+#line 72 "syntax.y" /* yacc.c:1646  */
     {
-        if(exist_var((yyvsp[-3].p)->l->id)||exist_arr((yyvsp[-3].p)->l->id)){
+        flag1 = 1;
+        if (exist_var((yyvsp[-3].p)->l->id) || exist_arr((yyvsp[-3].p)->l->id))
+        {
             printf("Error type 3 at line %d: Redefined variable \"%s\".\n", (yyvsp[-4].p)->line, (yyvsp[-4].p)->id);
+            }
+            else if(exist_struct((yyvsp[-3].p)->l->id)){
+                printf("Error type 16 at line %d: Duplicated name \"%s\".\n", (yyvsp[-3].p)->line, (yyvsp[-3].p)->l->id);
+            }
+            else{
+                add_struct((yyvsp[-3].p)->l->id, (yyvsp[-1].p));
+                //printf("%s\n", $2->l->id);
+            }
+            (yyval.p) = new_ast("StructSpecifier", 5, (yyvsp[-4].p), (yyvsp[-3].p), (yyvsp[-2].p), (yyvsp[-1].p), (yyvsp[0].p));
+            (yyval.p)->type = 7;
+            (yyval.p)->id = (yyvsp[-3].p)->l->id;
         }
-        else{
-            add_struct((yyvsp[-3].p)->l->id, (yyvsp[-1].p));
-            //printf("%s\n", $2->l->id);
-        }
-        (yyval.p) = new_ast("StructSpecifier", 5, (yyvsp[-4].p), (yyvsp[-3].p), (yyvsp[-2].p), (yyvsp[-1].p), (yyvsp[0].p));
-        (yyval.p)->type = 7;
-        (yyval.p)->id = (yyvsp[-3].p)->l->id;
-}
-#line 1553 "syntax.tab.c" /* yacc.c:1646  */
+#line 1564 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 78 "syntax.y" /* yacc.c:1646  */
-    { (yyval.p) = new_ast("StructSpecifier", 2, (yyvsp[-1].p), (yyvsp[0].p)); }
-#line 1559 "syntax.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 14:
-#line 80 "syntax.y" /* yacc.c:1646  */
-    {(yyval.p)=new_ast("OptTag",1,(yyvsp[0].p));}
-#line 1565 "syntax.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 15:
-#line 81 "syntax.y" /* yacc.c:1646  */
-    {(yyval.p)=new_ast("OptTag",-1);}
-#line 1571 "syntax.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 16:
-#line 83 "syntax.y" /* yacc.c:1646  */
-    {(yyval.p)=new_ast("Tag",1,(yyvsp[0].p));}
+#line 89 "syntax.y" /* yacc.c:1646  */
+    { 
+        (yyval.p) = new_ast("StructSpecifier", 2, (yyvsp[-1].p), (yyvsp[0].p));
+        //printf("%s\n", $2->id);
+        if (!exist_struct((yyvsp[0].p)->id))
+        {
+            printf("Error type 17 at line %d: Undefined structure \"%s\".\n", (yyvsp[0].p)->line, (yyvsp[0].p)->id);
+        }
+    }
 #line 1577 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
+  case 14:
+#line 98 "syntax.y" /* yacc.c:1646  */
+    {(yyval.p)=new_ast("OptTag",1,(yyvsp[0].p));}
+#line 1583 "syntax.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 15:
+#line 99 "syntax.y" /* yacc.c:1646  */
+    {(yyval.p)=new_ast("OptTag",-1);}
+#line 1589 "syntax.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 16:
+#line 101 "syntax.y" /* yacc.c:1646  */
+    {(yyval.p)=new_ast("Tag",1,(yyvsp[0].p));}
+#line 1595 "syntax.tab.c" /* yacc.c:1646  */
+    break;
+
   case 17:
-#line 85 "syntax.y" /* yacc.c:1646  */
+#line 103 "syntax.y" /* yacc.c:1646  */
     {
         //$1->type = 0;
         (yyval.p)=new_ast("VarDec",1,(yyvsp[0].p));
@@ -1590,178 +1608,199 @@ yyreduce:
         else
             add_var($1->id, 0);*/
     }
-#line 1594 "syntax.tab.c" /* yacc.c:1646  */
+#line 1612 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 97 "syntax.y" /* yacc.c:1646  */
+#line 115 "syntax.y" /* yacc.c:1646  */
     {
         (yyvsp[-3].p)->type = 3;
         (yyval.p) = new_ast("VarDec", 4, (yyvsp[-3].p), (yyvsp[-2].p), (yyvsp[-1].p), (yyvsp[0].p));
         //del_var($1->l->id);
         add_arr((yyvsp[-3].p)->id, 0, (yyvsp[-1].p)->a,0);
     }
-#line 1605 "syntax.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 19:
-#line 104 "syntax.y" /* yacc.c:1646  */
-    {(yyval.p)=new_ast("FunDec",4,(yyvsp[-3].p),(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
-#line 1611 "syntax.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 20:
-#line 105 "syntax.y" /* yacc.c:1646  */
-    {(yyval.p)=new_ast("FunDec",3,(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
-#line 1617 "syntax.tab.c" /* yacc.c:1646  */
-    break;
-
-  case 21:
-#line 107 "syntax.y" /* yacc.c:1646  */
-    {(yyval.p)=new_ast("VarList",3,(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
 #line 1623 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
-  case 22:
-#line 108 "syntax.y" /* yacc.c:1646  */
-    {(yyval.p)=new_ast("VarList",1,(yyvsp[0].p));}
+  case 19:
+#line 122 "syntax.y" /* yacc.c:1646  */
+    {(yyval.p)=new_ast("FunDec",4,(yyvsp[-3].p),(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
 #line 1629 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
-  case 23:
-#line 110 "syntax.y" /* yacc.c:1646  */
-    {(yyval.p)=new_ast("ParamDec",2,(yyvsp[-1].p),(yyvsp[0].p));}
+  case 20:
+#line 123 "syntax.y" /* yacc.c:1646  */
+    {(yyval.p)=new_ast("FunDec",3,(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
 #line 1635 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
-  case 24:
-#line 112 "syntax.y" /* yacc.c:1646  */
-    {(yyval.p)=new_ast("CompSt",4,(yyvsp[-3].p),(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
+  case 21:
+#line 125 "syntax.y" /* yacc.c:1646  */
+    {(yyval.p)=new_ast("VarList",3,(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
 #line 1641 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
-  case 25:
-#line 114 "syntax.y" /* yacc.c:1646  */
-    {(yyval.p)=new_ast("StmtList",2,(yyvsp[-1].p),(yyvsp[0].p));}
+  case 22:
+#line 126 "syntax.y" /* yacc.c:1646  */
+    {(yyval.p)=new_ast("VarList",1,(yyvsp[0].p));}
 #line 1647 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
-  case 26:
-#line 115 "syntax.y" /* yacc.c:1646  */
-    {(yyval.p)=new_ast("StmtList",-1);}
+  case 23:
+#line 128 "syntax.y" /* yacc.c:1646  */
+    {(yyval.p)=new_ast("ParamDec",2,(yyvsp[-1].p),(yyvsp[0].p));}
 #line 1653 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
+  case 24:
+#line 130 "syntax.y" /* yacc.c:1646  */
+    {
+        //printf("CompSt\n");
+        if (!flag1)
+        {
+            printf("%s", buf);
+            flag1 = 1;
+        }
+        (yyval.p)=new_ast("CompSt",4,(yyvsp[-3].p),(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));
+    }
+#line 1667 "syntax.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 25:
+#line 140 "syntax.y" /* yacc.c:1646  */
+    {(yyval.p)=new_ast("StmtList",2,(yyvsp[-1].p),(yyvsp[0].p));}
+#line 1673 "syntax.tab.c" /* yacc.c:1646  */
+    break;
+
+  case 26:
+#line 141 "syntax.y" /* yacc.c:1646  */
+    {(yyval.p)=new_ast("StmtList",-1);}
+#line 1679 "syntax.tab.c" /* yacc.c:1646  */
+    break;
+
   case 27:
-#line 117 "syntax.y" /* yacc.c:1646  */
+#line 143 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("Stmt",2,(yyvsp[-1].p),(yyvsp[0].p));}
-#line 1659 "syntax.tab.c" /* yacc.c:1646  */
+#line 1685 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 118 "syntax.y" /* yacc.c:1646  */
+#line 144 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("Stmt",1,(yyvsp[0].p));}
-#line 1665 "syntax.tab.c" /* yacc.c:1646  */
+#line 1691 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 29:
-#line 119 "syntax.y" /* yacc.c:1646  */
+#line 145 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("Stmt",3,(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
-#line 1671 "syntax.tab.c" /* yacc.c:1646  */
+#line 1697 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 30:
-#line 120 "syntax.y" /* yacc.c:1646  */
+#line 146 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("Stmt",5,(yyvsp[-4].p),(yyvsp[-3].p),(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
-#line 1677 "syntax.tab.c" /* yacc.c:1646  */
+#line 1703 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 31:
-#line 121 "syntax.y" /* yacc.c:1646  */
+#line 147 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("Stmt",7,(yyvsp[-6].p),(yyvsp[-5].p),(yyvsp[-4].p),(yyvsp[-3].p),(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
-#line 1683 "syntax.tab.c" /* yacc.c:1646  */
+#line 1709 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 32:
-#line 122 "syntax.y" /* yacc.c:1646  */
+#line 148 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("Stmt",5,(yyvsp[-4].p),(yyvsp[-3].p),(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
-#line 1689 "syntax.tab.c" /* yacc.c:1646  */
+#line 1715 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 33:
-#line 123 "syntax.y" /* yacc.c:1646  */
+#line 149 "syntax.y" /* yacc.c:1646  */
     {yyerrok;}
-#line 1695 "syntax.tab.c" /* yacc.c:1646  */
+#line 1721 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 34:
-#line 125 "syntax.y" /* yacc.c:1646  */
-    {(yyval.p)=new_ast("DefList",2,(yyvsp[-1].p),(yyvsp[0].p));}
-#line 1701 "syntax.tab.c" /* yacc.c:1646  */
+#line 151 "syntax.y" /* yacc.c:1646  */
+    {
+        if((yyvsp[-1].p)->l->l->type==1){
+            //printf("qianmian\n");
+            add_sym_type((yyvsp[-1].p)->l->r, "ID", 1, 0);
+            //printf("houmian\n");
+        }
+        else if((yyvsp[-1].p)->l->l->type==2){
+            add_sym_type((yyvsp[-1].p)->l->r, "ID", 2, 0);
+        }
+        else{
+            add_sym_type((yyvsp[-1].p)->l->r, "ID", 7, (yyvsp[-1].p)->l->l->l->r->id);
+        }
+        (yyval.p)=new_ast("DefList",2,(yyvsp[-1].p),(yyvsp[0].p));
+    }
+#line 1740 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 35:
-#line 126 "syntax.y" /* yacc.c:1646  */
+#line 165 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("DefList",-1);}
-#line 1707 "syntax.tab.c" /* yacc.c:1646  */
+#line 1746 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 36:
-#line 128 "syntax.y" /* yacc.c:1646  */
+#line 167 "syntax.y" /* yacc.c:1646  */
     {
         (yyval.p)=new_ast("Def",3,(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));
-        if(!strcmp((yyvsp[-2].p)->l->name,"TYPE"))
-            if(!strcmp((yyvsp[-2].p)->l->id,"int"))
+        /*if(!strcmp($1->l->name,"TYPE"))
+            if(!strcmp($1->l->id,"int"))
             {//int variables
                 printf("specifier int\n");
-                add_sym_type((yyvsp[-1].p),"ID",1,0);
+                add_sym_type($2,"ID",1,0);
             }
             else{//float variables
                 printf("Def:specifier float\n");
-                add_sym_type((yyvsp[-1].p),"ID",2,0);
+                add_sym_type($2,"ID",2,0);
             }
         else{//struct variables
             printf("specifier struct\n");
-            add_sym_type((yyvsp[-1].p),"ID",7,(yyvsp[-2].p)->id);
-        }
+            add_sym_type($2,"ID",7,$1->id);
+        }*/
     }
-#line 1729 "syntax.tab.c" /* yacc.c:1646  */
+#line 1768 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 37:
-#line 145 "syntax.y" /* yacc.c:1646  */
+#line 184 "syntax.y" /* yacc.c:1646  */
     {yyerrok;}
-#line 1735 "syntax.tab.c" /* yacc.c:1646  */
+#line 1774 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 38:
-#line 147 "syntax.y" /* yacc.c:1646  */
+#line 186 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("DecList",1,(yyvsp[0].p));}
-#line 1741 "syntax.tab.c" /* yacc.c:1646  */
+#line 1780 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 39:
-#line 148 "syntax.y" /* yacc.c:1646  */
+#line 187 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("DecList",3,(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
-#line 1747 "syntax.tab.c" /* yacc.c:1646  */
+#line 1786 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 40:
-#line 150 "syntax.y" /* yacc.c:1646  */
+#line 189 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("Dec",1,(yyvsp[0].p));}
-#line 1753 "syntax.tab.c" /* yacc.c:1646  */
+#line 1792 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 41:
-#line 151 "syntax.y" /* yacc.c:1646  */
+#line 190 "syntax.y" /* yacc.c:1646  */
     {
         (yyval.p)=new_ast("Dec",3,(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));
     }
-#line 1761 "syntax.tab.c" /* yacc.c:1646  */
+#line 1800 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 42:
-#line 154 "syntax.y" /* yacc.c:1646  */
+#line 193 "syntax.y" /* yacc.c:1646  */
     { 
         if((yyvsp[-2].p)->type==4||(yyvsp[-2].p)->type==5){
             printf("Error type 6 at line %d: The left-hand side of an assignment must be a variable.\n", (yyvsp[-2].p)->line);
@@ -1772,92 +1811,96 @@ yyreduce:
         (yyval.p) = new_ast("Exp", 3, (yyvsp[-2].p), (yyvsp[-1].p), (yyvsp[0].p));
         (yyval.p)->type = 0;
     }
-#line 1776 "syntax.tab.c" /* yacc.c:1646  */
+#line 1815 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 43:
-#line 164 "syntax.y" /* yacc.c:1646  */
+#line 203 "syntax.y" /* yacc.c:1646  */
     { (yyval.p) = new_ast("Exp", 3, (yyvsp[-2].p), (yyvsp[-1].p), (yyvsp[0].p)); }
-#line 1782 "syntax.tab.c" /* yacc.c:1646  */
+#line 1821 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 44:
-#line 165 "syntax.y" /* yacc.c:1646  */
+#line 204 "syntax.y" /* yacc.c:1646  */
     { (yyval.p) = new_ast("Exp", 3, (yyvsp[-2].p), (yyvsp[-1].p), (yyvsp[0].p)); }
-#line 1788 "syntax.tab.c" /* yacc.c:1646  */
+#line 1827 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 45:
-#line 166 "syntax.y" /* yacc.c:1646  */
+#line 205 "syntax.y" /* yacc.c:1646  */
     { (yyval.p) = new_ast("Exp", 3, (yyvsp[-2].p), (yyvsp[-1].p), (yyvsp[0].p)); }
-#line 1794 "syntax.tab.c" /* yacc.c:1646  */
+#line 1833 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 46:
-#line 168 "syntax.y" /* yacc.c:1646  */
+#line 207 "syntax.y" /* yacc.c:1646  */
     {
         (yyval.p) = new_ast("Exp", 3, (yyvsp[-2].p), (yyvsp[-1].p), (yyvsp[0].p));
-        if((yyvsp[-2].p)->type&&(yyvsp[0].p)->type&&(yyvsp[-2].p)->type!=(yyvsp[0].p)->type){
-            (yyval.p)->type = 0;
-            printf("Error type 7 at line %d: Type mismatched for operands.\n", (yyvsp[-2].p)->line);
-        }
+        //printf("$1->type:%d, $3->type:%d\n", $1->type, $3->type);
+        if()
+        if ((yyvsp[-2].p)->type && (yyvsp[0].p)->type && (yyvsp[-2].p)->type != (yyvsp[0].p)->type)
+            if(!((yyvsp[-2].p)->type == 1&&(yyvsp[0].p)->type==4||(yyvsp[-2].p)->type == 4&&(yyvsp[0].p)->type==1||(yyvsp[-2].p)->type == 2&&(yyvsp[0].p)->type==5||(yyvsp[-2].p)->type == 5&&(yyvsp[0].p)->type==2))
+            {
+                (yyval.p)->type = 0;
+                printf("Error type 7 at line %d: Type mismatched for operands.\n", (yyvsp[-2].p)->line);
+            }
     }
-#line 1806 "syntax.tab.c" /* yacc.c:1646  */
+#line 1849 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 47:
-#line 175 "syntax.y" /* yacc.c:1646  */
+#line 218 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("Exp",3,(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
-#line 1812 "syntax.tab.c" /* yacc.c:1646  */
+#line 1855 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 48:
-#line 176 "syntax.y" /* yacc.c:1646  */
+#line 219 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("Exp",3,(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
-#line 1818 "syntax.tab.c" /* yacc.c:1646  */
+#line 1861 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 49:
-#line 177 "syntax.y" /* yacc.c:1646  */
+#line 220 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("Exp",3,(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
-#line 1824 "syntax.tab.c" /* yacc.c:1646  */
+#line 1867 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 50:
-#line 178 "syntax.y" /* yacc.c:1646  */
+#line 221 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("Exp",3,(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
-#line 1830 "syntax.tab.c" /* yacc.c:1646  */
+#line 1873 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 51:
-#line 179 "syntax.y" /* yacc.c:1646  */
+#line 222 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("Exp",2,(yyvsp[-1].p),(yyvsp[0].p));}
-#line 1836 "syntax.tab.c" /* yacc.c:1646  */
+#line 1879 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 52:
-#line 180 "syntax.y" /* yacc.c:1646  */
+#line 223 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("Exp",2,(yyvsp[-1].p),(yyvsp[0].p));}
-#line 1842 "syntax.tab.c" /* yacc.c:1646  */
+#line 1885 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 53:
-#line 181 "syntax.y" /* yacc.c:1646  */
+#line 224 "syntax.y" /* yacc.c:1646  */
     {
         
         (yyval.p)=new_ast("Exp",4,(yyvsp[-3].p),(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));
     }
-#line 1851 "syntax.tab.c" /* yacc.c:1646  */
+#line 1894 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 54:
-#line 185 "syntax.y" /* yacc.c:1646  */
+#line 228 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("Exp",3,(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
-#line 1857 "syntax.tab.c" /* yacc.c:1646  */
+#line 1900 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 55:
-#line 186 "syntax.y" /* yacc.c:1646  */
+#line 229 "syntax.y" /* yacc.c:1646  */
     {
         (yyval.p) = new_ast("Exp", 4, (yyvsp[-3].p), (yyvsp[-2].p), (yyvsp[-1].p), (yyvsp[0].p));
         if((yyvsp[-3].p)->type==4){
@@ -1896,17 +1939,17 @@ yyreduce:
             }
         }
     }
-#line 1900 "syntax.tab.c" /* yacc.c:1646  */
+#line 1943 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 56:
-#line 224 "syntax.y" /* yacc.c:1646  */
+#line 267 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("Exp",3,(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
-#line 1906 "syntax.tab.c" /* yacc.c:1646  */
+#line 1949 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 57:
-#line 225 "syntax.y" /* yacc.c:1646  */
+#line 268 "syntax.y" /* yacc.c:1646  */
     {
         if(!exist_var((yyvsp[0].p)->id)&&!exist_arr((yyvsp[0].p)->id)){
             printf("Error type 1 at line %d: Undefined variable \"%s\".\n", (yyvsp[0].p)->line, (yyvsp[0].p)->id);
@@ -1919,37 +1962,37 @@ yyreduce:
             (yyvsp[0].p)->type = type_arr((yyvsp[0].p)->id);
         (yyval.p) = new_ast("Exp", 1, (yyvsp[0].p));
     }
-#line 1923 "syntax.tab.c" /* yacc.c:1646  */
+#line 1966 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 58:
-#line 237 "syntax.y" /* yacc.c:1646  */
+#line 280 "syntax.y" /* yacc.c:1646  */
     {
         (yyval.p)=new_ast("Exp",1,(yyvsp[0].p));
     }
-#line 1931 "syntax.tab.c" /* yacc.c:1646  */
+#line 1974 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 59:
-#line 240 "syntax.y" /* yacc.c:1646  */
+#line 283 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("Exp",1,(yyvsp[0].p));}
-#line 1937 "syntax.tab.c" /* yacc.c:1646  */
+#line 1980 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 60:
-#line 242 "syntax.y" /* yacc.c:1646  */
+#line 285 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("Args",3,(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
-#line 1943 "syntax.tab.c" /* yacc.c:1646  */
+#line 1986 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 61:
-#line 243 "syntax.y" /* yacc.c:1646  */
+#line 286 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("Args",1,(yyvsp[0].p));}
-#line 1949 "syntax.tab.c" /* yacc.c:1646  */
+#line 1992 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1953 "syntax.tab.c" /* yacc.c:1646  */
+#line 1996 "syntax.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2184,7 +2227,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 244 "syntax.y" /* yacc.c:1906  */
+#line 287 "syntax.y" /* yacc.c:1906  */
 
 yyerror(const char *msg)
 {
