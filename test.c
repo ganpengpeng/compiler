@@ -1,7 +1,11 @@
 /*struct mystruct{
     int i;
 };*/
-int fun(int i, int j, int k)
+int fun(int i)
 {
-    return 0;
+    return i;
+}
+int main()
+{
+    
 }

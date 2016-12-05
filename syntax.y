@@ -4,6 +4,7 @@
     int flag = 0;
     int flag1 = 0;
     int flag2 = 0;
+    int flag3 = 0;
     extern char buf1[50];
     char buf2[50];
 %}
@@ -64,64 +65,66 @@ ExtDef:
     }
     | Specifier SEMI {$$=new_ast("ExtDef",2,$1,$2);}
     | Specifier FunDec CompSt {
-        
-        //printf("here\n");
         char *fun_name = $2->l->id;
-        //printf("%s\n", fun_name);
-        //printf("%s\n", $1->l->name);
         int return_type = $1->l->type;
         int ture_return_type = 0;
-        struct ast *return_p = search_name($3,"RETURN");
-        //printf("ExtDef start\n");
-        if (return_p)
-        {
-            if(!strcmp(return_p->r->l->name,"ID")){
-                if(exist_fun_para(fun_name,return_p->r->l->id)){
-                    ture_return_type = exist_fun_para(fun_name,return_p->r->l->id);
-                }
-                else{
-                    if(flag2){
-                        printf("%s", buf2);
-                        flag2 = 0;
-                    }
-                    ture_return_type = return_p->r->type;
-                }
-            }
-            else{
-                if(flag2){
-                        printf("%s", buf2);
-                        flag2 = 0;
-                }
-                ture_return_type = return_p->r->type;
-            }
-            
-        }
-        else{
-            if(flag2){
-                printf("%s", buf2);
-                flag2 = 0;
-            }
-        }
-        if(!return_p){
-            printf("Error type 8 at line %d: Function \"%s\" has no return statement.\n", $3->l->r->r->r->line, fun_name);
-        }
-        else if(ture_return_type&&!(return_type==1&&ture_return_type==4||return_type==2&&ture_return_type==5))
-        {
-            printf("Error type 8 at line %d: Type mismatched for return.\n", return_p->line);
-        }
-        
         struct ast *varlist_p = 0;
-        printf("fun_name:%s,return_type:%d,ture_return_type:%d,line:%d\n", fun_name, return_type,ture_return_type,$2->line);
+        //printf("fun_name:%s,return_type:%d,ture_return_type:%d,line:%d\n", fun_name, return_type,ture_return_type,$2->line);
         if (!strcmp($2->l->r->r->name, "VarList"))
             varlist_p = $2->l->r->r;
         if (exist_fun(fun_name))
         {
+            flag3 = 1;
             printf("Error type 4 at line %d: Redefined function \"%s\".\n", $2->line, fun_name);
         }
-        else{
-            
+        else{//add fun here
             add_fun(fun_name, 1, return_type, varlist_p);
         }
+        struct ast *return_p = search_name($3,"RETURN");
+        if(!flag3){
+            if (return_p)
+            {
+                printf("1\n");
+                if (!strcmp(return_p->r->l->name, "ID"))
+                {//return id,judge if id at func paralist
+                    if(exist_fun_para(fun_name,return_p->r->l->id)){
+                        ture_return_type = exist_fun_para(fun_name,return_p->r->l->id);
+                        printf("%d..2\n",ture_return_type);
+                        flag2 = 0;
+                    }
+                    else{
+                        printf("3\n");
+                        if(flag2){
+                            printf("%s", buf2);
+                            flag2 = 0;
+                        }
+                        ture_return_type = return_p->r->type;
+                    }
+                }
+                else if(flag2){
+                    printf("%s", buf2);
+                    flag2 = 0;
+                    ture_return_type = return_p->r->type;
+                }
+                printf("4\n");
+            }
+            else if(flag2){
+                printf("%s", buf2);
+                flag2 = 0;
+            }
+            if(!return_p){
+                printf("Error type 8 at line %d: Function \"%s\" has no return statement.\n", $3->l->r->r->r->line, fun_name);
+            }
+            else if(return_type==1){
+                if(ture_return_type!=1&&ture_return_type!=4){
+                    printf("Error type 8 at line %d: Type mismatched for return.\n", return_p->line);
+                }
+            }
+            else if(ture_return_type!=2&&ture_return_type!=5){
+                printf("Error type 8 at line %d: Type mismatched for return.\n", return_p->line);
+            }
+        }
+        flag3 = 0;
         $$ = new_ast("ExtDef", 3, $1, $2, $3);
         //printf("ExtDef end\n");
     };

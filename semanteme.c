@@ -402,12 +402,12 @@ void add_fun(char *fun_name,int isdef,int return_type,struct ast* varlist_p)
                 para_p = 0;
         }
     }
-    printf("fun_name:%s,return_type:%d\n", temp->name, temp->return_type);
+    /*printf("add_fun_name:%s,return_type:%d\n", temp->name, temp->return_type);
     var_type_p printf_p = temp->para->var_next;
     while (printf_p){
         printf("para_name:%s,type:%d\n", printf_p->name, printf_p->type);
         printf_p = printf_p->var_next;
-    }
+    }*/
 }
 int match_fun(struct ast *exp_p,char *fun_name){
     var_type_p para_p = 0;
