@@ -84,6 +84,10 @@ void add_var(char *name, int type,char *struct_name,int line)
         //printf("%s\n", buf);
         return;
     }
+    else if(exist_fun(name)){
+        printf("Error type 3 at line %d: \"%s\" was a function.\n", line, name);
+        return;
+    }
     var_type_p temp = (var_type_p)malloc(sizeof(struct var_type));
     temp->name = name;
     temp->type = type;
@@ -296,10 +300,10 @@ void add_struct(char *struct_name,struct ast* deflist_p)
             //printf("add_struct_var:2\n");
             add_struct_var(def_p->l->r, &(temp->var),2);
         }
-        if(def_p->r)
+        //if(def_p->r)
             def_p = def_p->r->l;
-        else
-            def_p = 0;
+        //else
+            //def_p = 0;
     }
 }
 int exist_struct_field(char *name,char *field)
@@ -332,7 +336,7 @@ int exist_struct(char *name)
         }
     }
     return 0;
-}
+}/*
 void add_fun_para(struct ast *p, var_type_p *var,int type){
     if(!p)
         return;
@@ -353,7 +357,7 @@ void add_fun_para(struct ast *p, var_type_p *var,int type){
     add_struct_var(p->l, var,type);
     add_struct_var(p->r, var,type);
     return;
-}
+}*/
 void add_fun(char *fun_name,int isdef,int return_type,struct ast* varlist_p)
 {
     fun_type_p temp = (fun_type_p)malloc(sizeof(struct fun_type));
@@ -362,27 +366,65 @@ void add_fun(char *fun_name,int isdef,int return_type,struct ast* varlist_p)
     temp->return_type = return_type;
     temp->fun_next = fun_p;
     fun_p = temp;
-    if(!varlist_p)
-        temp->para = 0;
-    else{
+    temp->para = 0;
+    if (!varlist_p)
+        return;
+    else
+    {
         struct ast *para_p = varlist_p->l;
         while (para_p != 0)
         {
-            if (def_p->l->l->type==1)
+            if (para_p->l->l->type==1)
             {//int
                 //printf("add_struct_var:1\n");
-                add_struct_var(def_p->l->r, &(temp->var), 1);
+                var_type_p temp_var = temp->para;
+                temp->para = (var_type_p)malloc(sizeof(struct var_type));
+                temp->para->name = para_p->l->r->l->id;
+                temp->para->type = 1;
+                printf("%s:1\n", temp->para->name);
+                temp->para->var_next = temp_var;
             }
             else{
                 //printf("add_struct_var:2\n");
-                add_struct_var(def_p->l->r, &(temp->var),2);
+                var_type_p temp_var = temp->para;
+                temp->para = (var_type_p)malloc(sizeof(struct var_type));
+                temp->para->name = para_p->l->r->l->id;
+                temp->para->type = 2;
+                printf("%s:2\n", temp->para->name);
+                temp->para->var_next = temp_var;
             }
-            if(def_p->r)
-                def_p = def_p->r->l;
-            else
-                def_p = 0;
+            para_p = para_p->r;
         }
     }
-    
-    
+    printf("fun_name:%s,return_type:%d\n", temp->name, temp->return_type);
+    var_type_p printf_p = temp->para;
+    while (printf_p){
+        printf("para_name:%s,type:%d\n", printf_p->name, printf_p->type);
+        printf_p = printf_p->var_next;
+    }
 }
+int match_fun(struct ast *args_p,char *fun_name){
+    var_type_p para_p = 0;
+    for (fun_type_p p = fun_p; p; p = p->fun_next)
+    {
+        if(!strcmp(p->name,fun_name)){
+            para_p = p->para;
+            break;
+        }
+    }
+    if(!para_p)
+        return 0;
+    /*while (args_p)
+    {
+        if(args_p->l->type)
+    }*/
+}
+int exist_fun(char *fun_name){
+    for (fun_type_p p = fun_p; p; p = p->fun_next){
+        if(!strcmp(p->name,fun_name)){
+            return 1;
+        }
+    }
+    return 0;
+}
+//int cmpa_fun()

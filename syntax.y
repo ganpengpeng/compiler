@@ -62,8 +62,40 @@ ExtDef:
     }
     | Specifier SEMI {$$=new_ast("ExtDef",2,$1,$2);}
     | Specifier FunDec CompSt {
-        //if()
-        $$=new_ast("ExtDef",3,$1,$2,$3);
+        
+        //printf("here\n");
+        char *fun_name = $2->l->id;
+        //printf("%s\n", fun_name);
+        //printf("%s\n", $1->l->name);
+        int return_type = $1->l->type;
+        int ture_return_type = 0;
+        struct ast *return_p = search_name($3,"RETURN");
+        //printf("ExtDef start\n");
+        if (return_p)
+        {
+            ture_return_type = return_p->r->type;
+        }
+        if(!return_p){
+            printf("Error type 8 at line %d: Function \"%s\" has no return statement.\n", $3->l->r->r->r->line, fun_name);
+        }
+        else if(!(return_type==1&&ture_return_type==4||return_type==2&&ture_return_type==5))
+        {
+            printf("Error type 8 at line %d: Type mismatched for return.\n", return_p->line);
+        }
+        struct ast *varlist_p = 0;
+        //printf("fun_name:%s,return_type:%d,ture_return_type:%d\n", fun_name, return_type,ture_return_type);
+        if (!strcmp($2->l->r->r->name, "VarList"))
+            varlist_p = $2->l->r->r;
+        if (exist_fun(fun_name))
+        {
+            printf("Error type 4 at line %d: Redefined function \"%s\".\n", $2->line, fun_name);
+        }
+        else{
+            
+            add_fun(fun_name, 1, return_type, varlist_p);
+        }
+        $$ = new_ast("ExtDef", 3, $1, $2, $3);
+        //printf("ExtDef end\n");
     };
 ExtDecList:
     VarDec {$$=new_ast("ExtDecList",1,$1);}
@@ -131,13 +163,14 @@ ParamDec:
     Specifier VarDec {$$=new_ast("ParamDec",2,$1,$2);};
 CompSt:
     LC DefList StmtList RC {
-        //printf("CompSt\n");
+        //printf("CompSt start\n");
         if (!flag1)
         {
             printf("%s", buf);
             flag1 = 1;
         }
         $$=new_ast("CompSt",4,$1,$2,$3,$4);
+        //printf("CompSt end\n");
     };
 StmtList:
     Stmt StmtList {$$=new_ast("StmtList",2,$1,$2);}
@@ -224,8 +257,14 @@ Exp : Exp ASSIGNOP Exp {
     | MINUS Exp %prec UMINUS {$$=new_ast("Exp",2,$1,$2);}
     | NOT Exp {$$=new_ast("Exp",2,$1,$2);}
     | ID LP Args RP {
-        
-        $$=new_ast("Exp",4,$1,$2,$3,$4);
+        if(exist_var($1->id)||exist_arr($1->id)||exist_struct($1->id)){
+            printf("Error type 11 at line %d: \"%s\" is not a function.\n", $1->line, $1->id);
+        }
+        else if(!exist_fun($1->id)){
+            printf("Error type 2 at line %d: Undefined function \"%s\".\n", $1->line,$1->id);
+        }
+        match_fun($3, $1->id);
+        $$ = new_ast("Exp", 4, $1, $2, $3, $4);
     }
     | ID LP RP {$$=new_ast("Exp",3,$1,$2,$3);}
     | Exp LB Exp RB {
