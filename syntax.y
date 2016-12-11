@@ -64,6 +64,9 @@ ExtDef:
         }
     }
     | Specifier SEMI {$$=new_ast("ExtDef",2,$1,$2);}
+    | Specifier FunDec SEMI{
+        
+    }
     | Specifier FunDec CompSt {
         char *fun_name = $2->l->id;
         int return_type = $1->l->type;
@@ -106,6 +109,7 @@ ExtDef:
                     flag2 = 0;
                     ture_return_type = return_p->r->type;
                 }
+                ture_return_type = return_p->r->type;
                 printf("4\n");
             }
             else if(flag2){
@@ -117,6 +121,7 @@ ExtDef:
             }
             else if(return_type==1){
                 if(ture_return_type!=1&&ture_return_type!=4){
+                    printf("%d,%d\n", return_type, ture_return_type);
                     printf("Error type 8 at line %d: Type mismatched for return.\n", return_p->line);
                 }
             }

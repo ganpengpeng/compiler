@@ -46,6 +46,7 @@ struct fun_type
     int isdef;
     int return_type;
     struct var_type *para;
+    struct var_type *local_var;
     struct fun_type *fun_next;
 };
 struct ast *search_name(struct ast *p, char *name);
