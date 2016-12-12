@@ -10,7 +10,7 @@ var_type_p var_p = NULL;
 struct_type_p struct_p = NULL;
 array_type_p array_p = NULL;
 fun_type_p fun_p = NULL;
-char buf1[50];
+char buf1[500]=" ";
 extern int flag1;
 struct ast *search_name(struct ast *p, char *name)
 {//down to find name and return pointer to node
@@ -39,7 +39,7 @@ void add_sym_type(struct ast* p,char *name,int type,char* struct_name)
             set_arr_type(p->id, type,struct_name);
         }
         else if(type==1){
-            printf("func:add_sym_type, add %s:int\n", p->id);
+            //printf("func:add_sym_type, add %s:int\n", p->id);
             add_var(p->id, type, struct_name, p->line);
             set_arr_type(p->id, type,struct_name);
         }
@@ -74,14 +74,18 @@ void set_node_type(struct ast* p,char *name,int type)
 }
 void add_var(char *name, int type,char *struct_name,int line)
 {
-    if(exist_arr(name)){
+    //printf("---%s,%d---\n", name, line);
+    static int pos;
+    if (exist_arr(name))
+    {
         return;
     }
     if(exist_var(name)){
-        memset(buf1, 0, 50);
-        sprintf(buf1, "Error type 3 at line %d: Redefined variable \"%s\".\n", line, name);
-        flag1 = 0;
-        //printf("%s\n", buf1);
+        printf("pos:%d\n", pos);
+        //memset(buf1, 0, 500);
+        pos+=sprintf(buf1+pos, "Error type 3 at line %d: Redefined variable \"%s\".\n", line, name);
+        flag1 = 1;
+        //printf("func:%s\n", buf1);
         return;
     }
     else if(exist_fun(name)){
@@ -122,12 +126,16 @@ int exist_var(char *name)
     }
     return 0;
 }
-int type_var(char *name)
+int type_var(char *name,char **ref_name)
 {
     for (var_type_p p = var_p; p; p = p->var_next)
     {
-        if (!strcmp(name, p->name))
+        if (!strcmp(name, p->name)){
+            if(p->type==7)
+                *ref_name = p->struct_name;
             return p->type;
+        }
+            
     }
     return 0;
 }
@@ -147,7 +155,7 @@ void set_var_type(char *name,int type)
 }
 void del_var(char *name)
 {
-    printf("func:del_var\n");
+    //printf("func:del_var\n");
     if (!var_p)
         return;
     if (!strcmp(name, var_p->name))
@@ -305,6 +313,7 @@ void add_struct(char *struct_name,struct ast* deflist_p)
         //else
             //def_p = 0;
     }
+    printf("struct %s---\n", struct_name);
 }
 int exist_struct_field(char *name,char *field)
 {
@@ -410,6 +419,7 @@ void add_fun(char *fun_name,int isdef,int return_type,struct ast* varlist_p)
     }*/
 }
 int match_fun(struct ast *exp_p,char *fun_name){
+    //judge func declare or call fit with define
     var_type_p para_p = 0;
     for (fun_type_p p = fun_p; p; p = p->fun_next)
     {
@@ -434,27 +444,42 @@ int match_fun(struct ast *exp_p,char *fun_name){
         else
             break;
     }
-    if(!exp_p)
-        printf("exp_p: 0\n");
+    //if(!exp_p)
+    //    printf("exp_p: 0\n");
     if (!exp_p && !para_p)
         return 1;
     if(exp_p&&para_p){
-        if(exp_p->type==1)
-        printf("Error type 9 at line %d: There is argument int, but fuction float.\n", exp_p->line);
-        else 
-        printf("Error type 9 at line %d: There is argument float, but fuction int.\n", exp_p->line);
+        if(exp_p->type==1){
+            //printf("Error type 9 at line %d: There is argument int, but fuction float.\n", exp_p->line);
+            return 2;
+        }
+        else{
+            //printf("Error type 9 at line %d: There is argument float, but fuction int.\n", exp_p->line);
+            return 3;
+        }
     }
     else if(exp_p){
-        printf("Error type 9 at line %d: \"%s\" has too many arguments.\n", exp_p->line, fun_name);
+        //printf("Error type 9 at line %d: \"%s\" has too many arguments.\n", exp_p->line, fun_name);
+        return 4;
     }
-    else
-        printf("Error type 9 at line %d: arguments of \"%s\" are not enough.\n", exp_p->line, fun_name);
+    else{
+        //printf("Error type 9 at line %d: arguments of \"%s\" are not enough.\n", exp_p->line, fun_name);
+        return 5;
+    }
     return 0;
 }
 int exist_fun(char *fun_name){
     for (fun_type_p p = fun_p; p; p = p->fun_next){
         if(!strcmp(p->name,fun_name)){
             return 1;
+        }
+    }
+    return 0;
+}
+int isdef_fun(char *fun_name){
+    for (fun_type_p p = fun_p; p; p = p->fun_next){
+        if(!strcmp(p->name,fun_name)){
+            return p->isdef;
         }
     }
     return 0;

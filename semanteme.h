@@ -46,7 +46,7 @@ struct fun_type
     int isdef;
     int return_type;
     struct var_type *para;
-    struct var_type *local_var;
+    //struct var_type *local_var;
     struct fun_type *fun_next;
 };
 struct ast *search_name(struct ast *p, char *name);
@@ -56,7 +56,7 @@ void set_node_type(struct ast *p,char* name, int type);
 void add_var(char *name, int type,char *struct_name,int line);
 void add_digui_var(struct ast *p, int type, char *struct_name);
 int exist_var(char *name);
-int type_var(char *name);
+int type_var(char *name,char **ref_name);
 void set_var_type(char *name, int type);
 void del_var(char *name);
 void add_arr(char *name, int type, int dimen,char *struct_name);
@@ -70,6 +70,7 @@ int exist_struct_field(char *name, char *field);
 int exist_struct(char *name);
 void add_fun(char *fun_name, int isdef, int return_type, struct ast *varlist_p);
 int exist_fun(char *fun_name);
+int isdef_fun(char *fun_name);
 int exist_fun_para(char *fun_name,char *para_name);
 int match_fun(struct ast *p, char *fun_name);
 #endif
