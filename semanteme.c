@@ -274,7 +274,6 @@ void add_struct_var(struct ast *p, var_type_p *var,int type){
         return;
     if(!strcmp(p->name,"ID")){
         del_var(p->id);
-        //del_arr(p->id);
         if(exist_struct_var(var,p->id))
             printf("Error type 15 at line %d: Redefined field \"%s\".\n", p->line, p->id);
         else {
@@ -301,17 +300,12 @@ void add_struct(char *struct_name,struct ast* deflist_p)
     {
         if (def_p->l->l->type==1)
         {//int
-            //printf("add_struct_var:1\n");
             add_struct_var(def_p->l->r, &(temp->var), 1);
         }
         else{
-            //printf("add_struct_var:2\n");
             add_struct_var(def_p->l->r, &(temp->var),2);
         }
-        //if(def_p->r)
-            def_p = def_p->r->l;
-        //else
-            //def_p = 0;
+        def_p = def_p->r->l;
     }
     printf("struct %s---\n", struct_name);
 }

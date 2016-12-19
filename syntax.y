@@ -324,23 +324,6 @@ Exp : Exp ASSIGNOP Exp {
     | MINUS Exp %prec UMINUS {$$=new_ast("Exp",2,$1,$2);}
     | NOT Exp {$$=new_ast("Exp",2,$1,$2);}
     | ID LP Args RP {
-        /*struct ast *p = $3->l;
-        while (p)
-        {
-            if(p->type==4){
-                printf("const int: %d\n", p->a);
-            }
-            else if(p->type==5){
-                printf("const float: %f\n", p->b);
-            }
-            else {
-                printf("%s: %d\n", p->id, p->type);
-            }
-            if(p->r)
-                p = p->r->r->l;
-            else
-                p = 0;
-        }*/
         int i = 0;
         if (exist_var($1->id) || exist_arr($1->id) || exist_struct($1->id))
         {
