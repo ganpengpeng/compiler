@@ -1,5 +1,6 @@
 %{
     #include "semanteme.h"
+    #include "intermediate_code.h"
     #include "lex.yy.c"
     //control print syntax tree or not
     int flag = 0;
@@ -40,7 +41,7 @@
 %left LP RP LB RB DOT
 %%
 Program:
-    ExtDefList {$$=new_ast("Program",1,$1);/*if(!flag) print_tree($$,1);*/};
+    ExtDefList {$$=new_ast("Program",1,$1);if(!flag) print_tree($$,1);};
 ExtDefList:
     ExtDef ExtDefList {$$=new_ast("ExtDefList",2,$1,$2);}
     | {$$=new_ast("ExtDefList",-1);};

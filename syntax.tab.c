@@ -490,8 +490,8 @@ static const yytype_uint16 yyrline[] =
      213,   214,   216,   217,   219,   221,   230,   233,   235,   236,
      237,   238,   239,   240,   241,   243,   258,   260,   277,   279,
      280,   282,   283,   286,   306,   307,   308,   309,   320,   321,
-     322,   323,   324,   325,   326,   368,   369,   407,   419,   436,
-     439,   441,   442
+     322,   323,   324,   325,   326,   351,   352,   390,   402,   419,
+     422,   424,   425
 };
 #endif
 
@@ -1469,7 +1469,7 @@ yyreduce:
     {
         case 2:
 #line 43 "syntax.y" /* yacc.c:1646  */
-    {(yyval.p)=new_ast("Program",1,(yyvsp[0].p));/*if(!flag) print_tree($$,1);*/}
+    {(yyval.p)=new_ast("Program",1,(yyvsp[0].p));if(!flag) print_tree((yyval.p),1);}
 #line 1474 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
@@ -1994,23 +1994,6 @@ yyreduce:
   case 54:
 #line 326 "syntax.y" /* yacc.c:1646  */
     {
-        /*struct ast *p = $3->l;
-        while (p)
-        {
-            if(p->type==4){
-                printf("const int: %d\n", p->a);
-            }
-            else if(p->type==5){
-                printf("const float: %f\n", p->b);
-            }
-            else {
-                printf("%s: %d\n", p->id, p->type);
-            }
-            if(p->r)
-                p = p->r->r->l;
-            else
-                p = 0;
-        }*/
         int i = 0;
         if (exist_var((yyvsp[-3].p)->id) || exist_arr((yyvsp[-3].p)->id) || exist_struct((yyvsp[-3].p)->id))
         {
@@ -2035,17 +2018,17 @@ yyreduce:
         }
         (yyval.p) = new_ast("Exp", 4, (yyvsp[-3].p), (yyvsp[-2].p), (yyvsp[-1].p), (yyvsp[0].p));
     }
-#line 2039 "syntax.tab.c" /* yacc.c:1646  */
+#line 2022 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 55:
-#line 368 "syntax.y" /* yacc.c:1646  */
+#line 351 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("Exp",3,(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
-#line 2045 "syntax.tab.c" /* yacc.c:1646  */
+#line 2028 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 56:
-#line 369 "syntax.y" /* yacc.c:1646  */
+#line 352 "syntax.y" /* yacc.c:1646  */
     {
         (yyval.p) = new_ast("Exp", 4, (yyvsp[-3].p), (yyvsp[-2].p), (yyvsp[-1].p), (yyvsp[0].p));
         if((yyvsp[-3].p)->type==4){
@@ -2084,11 +2067,11 @@ yyreduce:
             }
         }
     }
-#line 2088 "syntax.tab.c" /* yacc.c:1646  */
+#line 2071 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 57:
-#line 407 "syntax.y" /* yacc.c:1646  */
+#line 390 "syntax.y" /* yacc.c:1646  */
     {
         (yyval.p)=new_ast("Exp",3,(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));
         //printf("dot---\n");
@@ -2101,11 +2084,11 @@ yyreduce:
             printf("Error type 14 at line %d: Non-existent field \"%s\".\n", (yyvsp[0].p)->line, (yyvsp[0].p)->id);
         }
     }
-#line 2105 "syntax.tab.c" /* yacc.c:1646  */
+#line 2088 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 58:
-#line 419 "syntax.y" /* yacc.c:1646  */
+#line 402 "syntax.y" /* yacc.c:1646  */
     {
         if (!exist_var((yyvsp[0].p)->id) && !exist_arr((yyvsp[0].p)->id) && !exist_struct((yyvsp[0].p)->id))
         {
@@ -2123,37 +2106,37 @@ yyreduce:
             (yyvsp[0].p)->type = type_arr((yyvsp[0].p)->id);
         (yyval.p) = new_ast("Exp", 1, (yyvsp[0].p));
     }
-#line 2127 "syntax.tab.c" /* yacc.c:1646  */
+#line 2110 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 59:
-#line 436 "syntax.y" /* yacc.c:1646  */
+#line 419 "syntax.y" /* yacc.c:1646  */
     {
         (yyval.p)=new_ast("Exp",1,(yyvsp[0].p));
     }
-#line 2135 "syntax.tab.c" /* yacc.c:1646  */
+#line 2118 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 60:
-#line 439 "syntax.y" /* yacc.c:1646  */
+#line 422 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("Exp",1,(yyvsp[0].p));}
-#line 2141 "syntax.tab.c" /* yacc.c:1646  */
+#line 2124 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 61:
-#line 441 "syntax.y" /* yacc.c:1646  */
+#line 424 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("Args",3,(yyvsp[-2].p),(yyvsp[-1].p),(yyvsp[0].p));}
-#line 2147 "syntax.tab.c" /* yacc.c:1646  */
+#line 2130 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
   case 62:
-#line 442 "syntax.y" /* yacc.c:1646  */
+#line 425 "syntax.y" /* yacc.c:1646  */
     {(yyval.p)=new_ast("Args",1,(yyvsp[0].p));}
-#line 2153 "syntax.tab.c" /* yacc.c:1646  */
+#line 2136 "syntax.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 2157 "syntax.tab.c" /* yacc.c:1646  */
+#line 2140 "syntax.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2388,7 +2371,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 443 "syntax.y" /* yacc.c:1906  */
+#line 426 "syntax.y" /* yacc.c:1906  */
 
 yyerror(const char *msg)
 {

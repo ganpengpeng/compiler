@@ -63,6 +63,9 @@ struct ast *new_ast(char *name, int num,...)
             root->type = 5;
             root->l = root->r = 0;
         }
+        else if(!strcmp(name, "RELOP")){
+            strcpy(root->id, yytext);
+        }
     }
     else
         root->line = -1;//void production statment
