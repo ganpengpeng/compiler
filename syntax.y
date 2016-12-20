@@ -41,7 +41,10 @@
 %left LP RP LB RB DOT
 %%
 Program:
-    ExtDefList {$$=new_ast("Program",1,$1);if(!flag) print_tree($$,1);};
+    ExtDefList {
+        $$=new_ast("Program",1,$1);
+        if(!flag) print_tree($$,1);
+    };
 ExtDefList:
     ExtDef ExtDefList {$$=new_ast("ExtDefList",2,$1,$2);}
     | {$$=new_ast("ExtDefList",-1);};
@@ -91,7 +94,6 @@ ExtDef:
         int ture_return_type = 0;
         struct ast *varlist_p = 0;
         flag3 = 0;
-        //printf("fun_name:%s,return_type:%d,ture_return_type:%d,line:%d\n", fun_name, return_type,ture_return_type,$2->line);
         if (!strcmp($2->l->r->r->name, "VarList"))
             varlist_p = $2->l->r->r;
         if (exist_fun(fun_name))
@@ -115,7 +117,6 @@ ExtDef:
                     ture_return_type = return_p->r->type;
                     if(exist_fun_para(fun_name,return_p->r->l->id)){
                         ture_return_type = exist_fun_para(fun_name,return_p->r->l->id);
-                        printf("%d..2\n",ture_return_type);
                         flag2 = 0;
                     }
                     else{
@@ -152,7 +153,7 @@ ExtDef:
         }
         flag3 = 0;
         $$ = new_ast("ExtDef", 3, $1, $2, $3);
-        //printf("ExtDef end\n");
+        translate_Fun($2,$3);
     };
 ExtDecList:
     VarDec {$$=new_ast("ExtDecList",1,$1);}
@@ -172,7 +173,6 @@ StructSpecifier:
             }
             else{
                 add_struct($2->l->id, $4);
-                //printf("%s\n", $2->l->id);
             }
             $$ = new_ast("StructSpecifier", 5, $1, $2, $3, $4, $5);
             $$->type = 7;
@@ -180,7 +180,6 @@ StructSpecifier:
         }
     | STRUCT Tag { 
         $$ = new_ast("StructSpecifier", 2, $1, $2);
-        //printf("%s\n", $2->id);
         if (!exist_struct($2->id))
         {
             printf("Error type 17 at line %d: Undefined structure \"%s\".\n", $2->line, $2->id);
@@ -193,21 +192,11 @@ Tag:
     ID {$$=new_ast("Tag",1,$1);};
 VarDec:
     ID {
-        //$1->type = 0;
         $$=new_ast("VarDec",1,$1);
-        /*
-        /if (exist_var($1->id) || exist_arr($1->id))
-        {
-            flag = 1;
-            printf("Error type 3 at line %d: Redefined variable \"%s\".\n", $1->line, $1->id);
-        }
-        else
-            add_var($1->id, 0);*/
     }
     | VarDec LB INT RB {
         $1->type = 3;
         $$ = new_ast("VarDec", 4, $1, $2, $3, $4);
-        //del_var($1->l->id);
         add_arr($1->id, 0, $3->a,0);
     };
 FunDec:
@@ -235,9 +224,15 @@ StmtList:
 Stmt:
     Exp SEMI {$$=new_ast("Stmt",2,$1,$2);}
     | CompSt {$$=new_ast("Stmt",1,$1);}
-    | RETURN Exp SEMI {$$=new_ast("Stmt",3,$1,$2,$3);}
-    | IF LP Exp RP Stmt %prec LOWER_THAN_ELSE {$$=new_ast("Stmt",5,$1,$2,$3,$4,$5);}
-    | IF LP Exp RP Stmt ELSE Stmt {$$=new_ast("Stmt",7,$1,$2,$3,$4,$5,$6,$7);}
+    | RETURN Exp SEMI {
+        $$ = new_ast("Stmt", 3, $1, $2, $3);
+    }
+    | IF LP Exp RP Stmt %prec LOWER_THAN_ELSE {
+        $$ = new_ast("Stmt", 5, $1, $2, $3, $4, $5);
+    }
+    | IF LP Exp RP Stmt ELSE Stmt {
+        $$ = new_ast("Stmt", 7, $1, $2, $3, $4, $5, $6, $7);
+    }
     | WHILE LP Exp RP Stmt {$$=new_ast("Stmt",5,$1,$2,$3,$4,$5);}
     | error SEMI {yyerrok;};
 DefList:
@@ -254,7 +249,7 @@ DefList:
         else if(exist_struct($1->l->l->l->r->id)){
             add_sym_type($1->l->r, "ID", 7, $1->l->l->l->r->id);
         }
-        $$=new_ast("DefList",2,$1,$2);
+        $$ = new_ast("DefList", 2, $1, $2);
     }
     | { $$ = new_ast("DefList", -1); };
 Def:
@@ -290,7 +285,8 @@ Exp : Exp ASSIGNOP Exp {
             printf("Error type 6 at line %d: The left-hand side of an assignment must be a variable.\n", $1->line);
         }
         else if($1->type&&$3->type&&$1->type!=$3->type){
-            printf("Error type 5 at line %d: Type mismatched for assignment.\n",$1->line);
+            if(!($1->type==1&&$3->type==4||$1->type==2&&$3->type==5))
+                printf("Error type 5 at line %d: Type mismatched for assignment.\n", $1->line);
         }
         else if($1->type&&$3->type&&$1->type==7&&$3->type==7){
             char *type1, *type2;
@@ -306,13 +302,15 @@ Exp : Exp ASSIGNOP Exp {
     }
     | Exp AND Exp { $$ = new_ast("Exp", 3, $1, $2, $3); }
     | Exp OR Exp { $$ = new_ast("Exp", 3, $1, $2, $3); }
-    | Exp RELOP Exp { $$ = new_ast("Exp", 3, $1, $2, $3); }
+    | Exp RELOP Exp { 
+        $$ = new_ast("Exp", 3, $1, $2, $3);
+    }
     | Exp PLUS Exp
     {
         $$ = new_ast("Exp", 3, $1, $2, $3);
         //printf("$1->type:%d, $3->type:%d\n", $1->type, $3->type);
         if ($1->type && $3->type && $1->type != $3->type)
-            if(!($1->type == 1&&$3->type==4||$1->type == 4&&$3->type==1||$1->type == 2&&$3->type==5||$1->type == 5&&$3->type==2))
+            if (!($1->type == 1 && $3->type == 4 || $1->type == 4 && $3->type == 1 || $1->type == 2 && $3->type == 5 || $1->type == 5 && $3->type == 2))
             {
                 $$->type = 0;
                 printf("Error type 7 at line %d: Type mismatched for operands.\n", $1->line);
@@ -349,28 +347,26 @@ Exp : Exp ASSIGNOP Exp {
         }
         $$ = new_ast("Exp", 4, $1, $2, $3, $4);
     }
-    | ID LP RP {$$=new_ast("Exp",3,$1,$2,$3);}
+    | ID LP RP {
+        $$ = new_ast("Exp", 3, $1, $2, $3);
+    }
     | Exp LB Exp RB {
         $$ = new_ast("Exp", 4, $1, $2, $3, $4);
         if($1->type==4){
             printf("Error type 10 at line %d: \"%d\" is not an array.\n", $1->line, $1->a);
             $$->type = 0;
-            //flag = 1;
         }
         else if($1->type==5) {
             printf("Error type 10 at line %d: \"%f\" is not an array.\n", $1->line, $1->b);
             $$->type = 0;
-            //flag = 1;
         }
         else if(exist_var($1->id)){
             printf("Error type 10 at line %d: \"%s\" is not an array.\n", $1->line, $1->id);
             $$->type = 0;
-            //flag = 1;
         }
         else if(!exist_arr($1->id)){
             printf("Error type 1 at line %d: Undefined variable \"%s\".\n", $1->line, $1->id);
             $$->type = 0;
-            //flag = 1;
         }
         else if(exist_arr($1->id))
             $$->type = type_arr($1->id);
@@ -407,7 +403,6 @@ Exp : Exp ASSIGNOP Exp {
             sprintf(buf2,"Error type 1 at line %d: Undefined variable \"%s\".\n", $1->line, $1->id);
             flag2 = 1;
             $1->type = 0;
-            //flag = 1;
         }
         else if(exist_var($1->id)){
             char *temp;
@@ -427,6 +422,6 @@ Args:
 %%
 yyerror(const char *msg)
 {
-    printf("Syntax error at line %d : %s\n", yylineno, msg);
+    printf("Error at line %d : %s\n", yylineno, msg);
     flag = 1;
 }

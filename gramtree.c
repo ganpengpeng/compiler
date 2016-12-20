@@ -16,6 +16,7 @@ struct ast *new_ast(char *name, int num,...)
         return root;
     }
     root->name = name;
+    root->r = root->l = 0;
     va_start(valist, num);
     if (num >= 1)//nonterminal token
     {
@@ -64,11 +65,16 @@ struct ast *new_ast(char *name, int num,...)
             root->l = root->r = 0;
         }
         else if(!strcmp(name, "RELOP")){
+            root->id = (char *)malloc(sizeof(char) * 5);
             strcpy(root->id, yytext);
+            root->type=0;
+            root->l = root->r = 0;
         }
     }
-    else
+    else{
         root->line = -1;//void production statment
+        root->l = root->r = 0;
+    }
     return root;
 }
 void print_tree(struct ast *root, int level)
@@ -89,6 +95,6 @@ void print_tree(struct ast *root, int level)
         }
         if(root->line!=-1) printf("\n");
         print_tree(root->l, level + 1);
-        print_tree(root->r,level);
+        print_tree(root->r, level);
     }
 }
